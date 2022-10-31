@@ -12,13 +12,13 @@ add_executable (UnoCPP "UnoCPP.cpp"
 "models/card.h"
 "models/deck.h"
 "controller/controller.h" 
-"view/Header1.h" 
+"view/text_view.h" 
 "models/card.cpp"
 "models/player.cpp" 
 "models/hand.h"
 "models/hand.cpp" 
 "models/deck.cpp"
 "models/game_state.h"
-"models/game_state.cpp")
+"models/game_state.cpp" "view/text_view.cpp")
 
 # TODO: Add tests and install targets if needed.
