@@ -13,4 +13,5 @@ public:
 	const Card& remove_card(int pos);
 	const std::vector<Card>& cards() const;
 	std::string format() const;
+	int get_number_cards() const;
 };

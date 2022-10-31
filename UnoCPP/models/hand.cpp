@@ -41,3 +41,7 @@ std::string Hand::format() const {
 
 	return formatted;
 }
+
+int Hand::get_number_cards() const {
+	return static_cast<int>(_cards.size());
+}
