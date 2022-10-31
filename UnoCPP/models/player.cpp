@@ -4,6 +4,10 @@ Card& Player::play_card(Card& card){
 	_hand.remove_card(card);
 }
 
+Card& Player::play_card(int card) {
+	_hand.remove_card(card);
+}
+
 void Player::add_card(Card& card)
 {
 	_hand.add_card(card);

@@ -10,6 +10,7 @@ class Player {
 	Hand _hand;
 public:
 	Card& play_card(Card& card);
+	Card& play_card(int card);
 	void add_card(Card& card);
 	std::string format() const;
 	const Hand& get_hand() const;
