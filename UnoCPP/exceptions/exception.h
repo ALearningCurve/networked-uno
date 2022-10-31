@@ -7,5 +7,7 @@ class Ex : public std::exception {
     Ex();
 public:
     Ex(const char* msg) noexcept : _msg(msg) {};
-    const char* what() const noexcept;
+    const char* what() const noexcept {
+        return _msg;
+    }
 };

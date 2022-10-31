@@ -2,7 +2,6 @@
 
 #include "card.h"
 #include "hand.h"
-#include <collection.h>
 #include <algorithm>
 #include <random>
 #include <chrono>

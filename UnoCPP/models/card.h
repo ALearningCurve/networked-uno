@@ -2,6 +2,8 @@
 #include <cstring>
 #include <sstream>
 
+
+
 class Card {
 	std::string _type;
 	std::string _color;

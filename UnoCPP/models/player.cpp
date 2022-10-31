@@ -1,11 +1,11 @@
 #include "player.h"
 
-Card& Player::play_card(Card& card){
-	_hand.remove_card(card);
+const Card& Player::play_card(Card& card){
+	return _hand.remove_card(card);
 }
 
-Card& Player::play_card(int card) {
-	_hand.remove_card(card);
+const Card& Player::play_card(int card) {
+	return _hand.remove_card(card);
 }
 
 void Player::add_card(Card& card)

@@ -1,13 +1,13 @@
 #include "deck.h"
 
 void Deck::create_card_deck() {
-
+	
 }
 
 void Deck::shuffle_deck() {
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	unsigned seed = static_cast<int>(std::chrono::system_clock::now().time_since_epoch().count());
 	std::default_random_engine rand(seed);
-	std::random_shuffle(_cards.begin(), _cards.end(), rand);
+	std::shuffle(_cards.begin(), _cards.end(), rand);
 }
 
 void Deck::create_n_card_decks(int n) {
@@ -18,7 +18,7 @@ void Deck::create_n_card_decks(int n) {
 }
 
 int Deck::get_card_count() {
-	return this->_cards.size();
+	return static_cast<int>(_cards.size());
 }
 
 const Card& Deck::draw_card() {

@@ -1,7 +1,7 @@
 #pragma once
 #include "card.h"
-#include <collection.h>
 #include "../exceptions/exception.h"
+#include <vector>
 
 class Hand {
 	std::vector<Card> _cards;
