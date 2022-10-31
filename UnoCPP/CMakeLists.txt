@@ -19,6 +19,6 @@ add_executable (UnoCPP "UnoCPP.cpp"
 "models/hand.cpp" 
 "models/deck.cpp"
 "models/game_state.h"
-"models/game_state.cpp" "view/text_view.cpp")
+"models/game_state.cpp" "view/text_view.cpp" "controller/text_controller.cpp")
 
 # TODO: Add tests and install targets if needed.

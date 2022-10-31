@@ -12,15 +12,15 @@ const std::vector<Player>& GameState::get_players() {
 	return _players;
 }
 
-bool GameState::get_is_reversed() {
+bool GameState::get_is_reversed() const {
 	return _is_reversed;
 }
 
-bool GameState::get_is_game_started() {
-	return _is_game_started;
+void GameState::flip_direction() {
+	_is_reversed = !_is_reversed;
 }
 
-int GameState::get_next_player() {
+int GameState::get_next_player() const {
 	int dir = _is_reversed ? -1 : 1;
 	int next_turn = _current_turn + dir;
 	int size = static_cast<int>(_players.size());
@@ -38,12 +38,29 @@ int GameState::get_next_player() {
 	return next_turn;
 }
 
-bool GameState::is_game_over() {
-	for (Player& player : _players) {
+bool GameState::is_game_over() const {
+	for (const Player& player : _players) {
 		if (player.get_hand().get_number_cards() == 0) {
 			return true;
 		}
 	}
 
 	return false;
+}
+
+std::string GameState::get_color() const {
+	return _color;
+}
+
+void GameState::set_color(std::string color) {
+	bool valid = false;
+	for (int i = 0; i < NUM_CARD_COLORS; ++i) {
+		valid = valid || CARD_COLORS[i] == color;
+	}
+	if (valid) {
+		_color = color;
+	}
+	else {
+		throw Ex("Given a color that does not exist");
+	}
 }
