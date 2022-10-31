@@ -6,6 +6,6 @@ cmake_minimum_required (VERSION 3.8)
 project ("UnoCPP")
 
 # Add source to this project's executable.
-add_executable (UnoCPP "UnoCPP.cpp" "UnoCPP.h")
+add_executable (UnoCPP "UnoCPP.cpp" "UnoCPP.h" "models/player.h" "models/card.h" "models/deck.h" "controller/controller.h" "view/Header1.h" "models/card.cpp" "models/player.cpp" "models/hand.h" "models/hand.cpp" "models/deck.cpp")
 
 # TODO: Add tests and install targets if needed.
