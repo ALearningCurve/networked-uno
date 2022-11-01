@@ -1,8 +1,5 @@
 #include "game_state.h"
 
-void GameState::add_player(Player& player) {
-	_players.push_back(player);
-}
 
 const Player& GameState::get_current_player() {
 	return _players.at(_current_turn);

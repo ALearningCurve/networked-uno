@@ -12,7 +12,7 @@ class Deck
 	std::vector<Card> _cards;
 	void create_card_deck();
 public:
-	Deck() { create_n_card_decks(1); shuffle_deck(); };
+	Deck(): Deck(2) {};
 	Deck(int n) { create_n_card_decks(n); shuffle_deck(); };
 	void shuffle_deck();
 	void create_n_card_decks(int n);

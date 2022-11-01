@@ -9,6 +9,7 @@ class Player {
 	std::string _name;
 	Hand _hand;
 public:
+	Player(std::string name) : _name(name) {};
 	const Card& play_card(Card& card);
 	const Card& play_card(int card);
 	void add_card(Card& card);

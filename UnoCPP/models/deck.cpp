@@ -1,7 +1,19 @@
 #include "deck.h"
 
 void Deck::create_card_deck() {
-	
+	/*originaldeck = [UnoCard(c, v) for v in ttypes for c in colors] + \
+		[UnoCard('Wild', 'Wild') for _ in range(4)] + \
+		[UnoCard('Wild', 'Draw Four') for _ in range(4)]*/
+
+	for (int c = 0; c < NUM_CARD_COLORS; ++c) {
+		for (int t = 0; t < NUM_COLOR_CARD_TYPES; ++t) {
+			_cards.push_back(Card(COLOR_CARD_TYPES[t], CARD_COLORS[c]));
+		}
+
+		for (int t = 0; t < NUM_WILD_CARD_TYPES; ++t) {
+			_cards.push_back(Card("Wild", WILD_CARD_TYPES[c]));
+		}
+	}
 }
 
 void Deck::shuffle_deck() {
