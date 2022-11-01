@@ -1,5 +1,5 @@
 #include "text_view.h"
 
 void TextView::output(std::string msg) {
-	std::cout << msg << std::endl;
+	_out << msg << std::endl;
 }

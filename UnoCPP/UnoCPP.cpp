@@ -8,7 +8,7 @@ int main()
 {
 	cout << "-------------------------------" << endl;
 	cout << "Starting UNO" << endl;
-	cout << "-------------------------------\n\n\n" << endl;
+	cout << "-------------------------------\n\n" << endl;
 
 
 	Deck deck;
@@ -17,9 +17,9 @@ int main()
 	Player p3("player 3");
 	std::vector<Player> players = { p1, p2, p3 };
 	GameState game(deck, players);
-	TextView view;
-	TextController controller(game, view);
-
+	TextView view(cout);
+	TextController controller(game, view, cin);
+	controller.startGame();
 	return 0;
 }
 

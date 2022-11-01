@@ -3,7 +3,8 @@
 #include "../models/player.h"
 #include "../models/card.h"
 #include "../view/text_view.h"
-
+#include <iostream>
+#include <istream>
 
 
 class Controller {
@@ -12,11 +13,11 @@ public:
 };
 
 class TextController : Controller {
-	GameState _model;
-	TextView _view;
+	GameState& _model;
+	TextView& _view;
 
 public:
-	TextController(GameState& model, TextView& view) : _model(model), _view(view) {};
+	TextController(GameState& model, TextView& view, std::istream& stream) : _model(model), _view(view) {};
 
 	void startGame();
 };
