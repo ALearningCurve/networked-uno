@@ -8,11 +8,17 @@
 class Player {
 	std::string _name;
 	Hand _hand;
+	bool _is_bot;
 public:
-	Player(std::string name) : _name(name) {};
+	Player(std::string name) : _name(name), _is_bot(false) {};
 	const Card& play_card(Card& card);
 	const Card& play_card(int card);
 	void add_card(Card& card);
+
+	/**
+	* Returns the player's name as a string
+	*/
 	std::string format() const;
 	const Hand& get_hand() const;
+	bool is_bot() const;
 };

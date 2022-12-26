@@ -13,10 +13,16 @@ void Player::add_card(Card& card)
 	_hand.add_card(card);
 }
 
+
 std::string Player::format() const {
 	return _name;
 }
 
 const Hand& Player::get_hand() const {
 	return _hand;
+}
+
+bool Player::is_bot() const
+{
+	return _is_bot;
 }
