@@ -1,21 +1,58 @@
+#pragma once
+#include <string>
+#include <vector>
+#include "../helpers/stringutils.h"
+
 // Base class
 class TextCommand {
 protected: 
-    std::string _args;
+    std::vector<std::string> _args;
 
 public:
-    TextCommand(std::string args) {
-        args.split
+
+    virtual void run(GameState &state) = 0;
+
+    void set_args(std::string& args) {
+        _args = split_str(args);
     }
 
-    virtual run(GameState &state);
-    void setWidth(int w) {
-        width = w;
+    void set_args(const std::vector<std::string>& args) {
+        _args.clear();
+        copy(args.begin(), args.end(), back_inserter(_args));
+    }
+    
+    virtual std::string get_name() const = 0;
+};
+
+class DrawCommand : public TextCommand {
+public:
+     std::string get_name() const {
+        return "Draw";
+     }
+
+     void run(GameState& state) {
+
+     }
+};
+
+class PlayCommand : public TextCommand {
+public:
+    std::string get_name() const {
+        return "Play";
     }
 
-    void setHeight(int h) {
-        height = h;
+    void run(GameState& state) {
+
+    }
+};
+
+class UnoCommand : public TextCommand {
+public:
+    std::string get_name() const {
+        return "Uno";
     }
 
+    void run(GameState& state) {
 
+    }
 };
