@@ -22,7 +22,3 @@ int main()
 	controller.startGame();
 	return 0;
 }
-
-
-// THINGS WE NEED:
-//	- Card
