@@ -21,20 +21,17 @@ class TextController : Controller {
 	bool _quit = false;
 
 
-	std::map<std::string, TextCommand*> make_dict() {
-		std::map<std::string, TextCommand*> m;
-		m["play"] = &PlayCommand();
-		m["draw"] = &DrawCommand();
-		m["uno"] = &UnoCommand();
+	std::map<std::string, std::shared_ptr<TextCommand>> make_dict() {
+		std::map<std::string, std::shared_ptr<TextCommand>> m;
+		m["play"] = std::make_shared<PlayCommand>();
+		m["draw"] = std::make_shared<DrawCommand>();
+		m["uno"] = std::make_shared<UnoCommand>();
 		return m;
 	}
 
-	const std::map<std::string, TextCommand*> _command_dict = make_dict();
+	const std::map<std::string, std::shared_ptr<TextCommand>> _command_dict = make_dict();
 
 	const void playerDoTurn(Player& player);
-
-
-	
 
 public:
 	TextController(GameState& model, TextView& view, std::istream& istream) : _model(model), _view(view), _input(istream) {};

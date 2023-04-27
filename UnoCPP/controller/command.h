@@ -10,7 +10,7 @@ protected:
 
 public:
 
-    virtual void run(GameState &state) = 0;
+    virtual void run(GameState &state, TextView &view) = 0;
 
     void set_args(std::string& args) {
         _args = split_str(args);
@@ -30,7 +30,7 @@ public:
         return "Draw";
      }
 
-     void run(GameState& state) {
+     void run(GameState& state, TextView& view) {
 
      }
 };
@@ -41,8 +41,8 @@ public:
         return "Play";
     }
 
-    void run(GameState& state) {
-
+    void run(GameState& state, TextView& view) {
+        
     }
 };
 
@@ -52,7 +52,7 @@ public:
         return "Uno";
     }
 
-    void run(GameState& state) {
+    void run(GameState& state, TextView& view) {
 
     }
 };

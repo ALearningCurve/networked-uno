@@ -79,8 +79,8 @@ const void TextController::playerDoTurn(Player& player) {
 			// if the command is recognized, then we want to let the 
 			// user know
 			_view.output("[ ] Running " + command_name);
-			// and then we want to run the command
-			// TODO: for now we want to ignore
+			std::shared_ptr<TextCommand> command = _command_dict.find(command_name)->second;
+			command->run(this->_model, this->_view);
 
 			// try running
 			// if error output message
