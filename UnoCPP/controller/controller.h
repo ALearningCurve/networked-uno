@@ -7,6 +7,9 @@
 #include <istream>
 #include <map>
 #include "command.h"
+#include <functional>
+
+using VecCommand = std::function<TextCommand*(const std::vector<std::string>&)>;
 
 class Controller {
 public:
@@ -21,15 +24,17 @@ class TextController : Controller {
 	bool _quit = false;
 
 
-	std::map<std::string, std::shared_ptr<TextCommand>> make_dict() {
-		std::map<std::string, std::shared_ptr<TextCommand>> m;
-		m["play"] = std::make_shared<PlayCommand>();
-		m["draw"] = std::make_shared<DrawCommand>();
-		m["uno"] = std::make_shared<UnoCommand>();
+	std::map<std::string, VecCommand> make_dict() {
+		std::map<std::string, VecCommand> m;
+		m["play"] = [](auto vec) { return new PlayCommand(vec); };
+		m["draw"] = [](auto vec) {return new DrawCommand(); };
+		m["uno"] = [](auto vec) {return new UnoCommand(); };
+		m["help"] = [](auto vec) {return new HelpCommand(); };
+
 		return m;
 	}
 
-	const std::map<std::string, std::shared_ptr<TextCommand>> _command_dict = make_dict();
+	const std::map<std::string, VecCommand> _command_dict = make_dict();
 
 	const void playerDoTurn(Player& player);
 

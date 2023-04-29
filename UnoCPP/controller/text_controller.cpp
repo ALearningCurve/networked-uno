@@ -38,7 +38,7 @@ const void TextController::playerDoTurn(Player& player) {
 	
 	while (true) {
 		// every time we are here we are looking for input
-		_view.output("[ ] Enter Input ('h' for help)");
+		_view.output("[ ] Enter Input ('help' for help)");
 
 		if (_input.eof()) {
 			throw Ex("Unexpectedly ran out of input...");
@@ -53,38 +53,44 @@ const void TextController::playerDoTurn(Player& player) {
 			_quit = true;
 			return;
 		}
-		else if (uinput == "h") {
-			_view.output(
-				"Help Menu: \n"
-				"  h: help \n"
-				"  draw: draw a card\n"
-				"  play: play a card\n"
-				"  uno: shout uno\n"
-				"  q: quit"
-				);
-		}
 
 		std::string command_name = lsplit_str(uinput);
-		const auto iter = _command_dict.find(command_name);
+		const auto commandEntry = _command_dict.find(command_name);
 
-
-		if (iter == _command_dict.end()) {
-			// if the command is not recognized, then we want to 
-			// let the user know and output it to the console
-
-			_view.output("[ ] Unknown Command: '" + command_name + "'");
-			
+		if (commandEntry == _command_dict.end()) {
+			_view.output("[X] Unknown Command: '" + command_name + "'");
 		}
 		else {
-			// if the command is recognized, then we want to let the 
-			// user know
-			_view.output("[ ] Running " + command_name);
-			std::shared_ptr<TextCommand> command = _command_dict.find(command_name)->second;
-			command->run(this->_model, this->_view);
+			std::vector<std::string> vec;
+			split_str(uinput, " ", vec);
+			vec.erase(vec.begin()); // get rid of the first input (which is the command name
+			TextCommand* command;
 
-			// try running
-			// if error output message
-			break;
+			try {
+				command = commandEntry->second(vec);
+			}
+			catch (const std::exception& ex) {
+				_view.output(std::string("[X] BAD INPUT: ") + ex.what());
+				continue;
+			} 
+			catch (...) {
+				return _view.output("[X] BAD INPUT: failed to create command with given parameters");
+				std::rethrow_exception(std::current_exception());
+				continue;
+			}
+
+			try {
+				command->run(this->_model, this->_view);
+			}
+			catch (const std::exception& ex) {
+				_view.output(std::string("[X] ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
+			}
+			catch (...) {
+				_view.output("[X] UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
+				std::rethrow_exception(std::current_exception());
+			}
+			delete command;
+			return;
 		}
 	}
 }

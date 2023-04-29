@@ -1,9 +1,8 @@
 #include "stringutils.h"
+#include <iostream>
 
-std::vector<std::string>& split_str(const std::string& str, const std::string& delim)
+void split_str(const std::string& str, const std::string& delim, std::vector<std::string>& strings)
 {
-	std::vector<std::string>(strings);
-
     size_t start = 0;
     size_t end = str.find(delim);
 
@@ -15,8 +14,6 @@ std::vector<std::string>& split_str(const std::string& str, const std::string& d
     }
 
     strings.push_back(str.substr(start, end - start));
-
-	return strings;
 }
 
 std::string lsplit_str(const std::string& str, const std::string& delim, const unsigned int& offset) {
