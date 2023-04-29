@@ -9,7 +9,7 @@ const std::string CARD_COLORS[NUM_CARD_COLORS] = { "red", "green", "blue", "yell
 
 std::string Card::format() const {
 	std::stringstream ss;
-	ss << this->_type << ", " << this->_color;
+	ss << this->_color << this->_type;
 	std::string s = ss.str();
 	return s;
 }

@@ -7,9 +7,10 @@
 #include <chrono>
 #include "../exceptions/exception.h"
 
+
 class Deck
 {
-	std::vector<Card> _cards;
+	std::vector<std::shared_ptr<const Card>> _cards;
 	void create_card_deck();
 public:
 	Deck(): Deck(2) {};
@@ -19,5 +20,5 @@ public:
 	int get_card_count();
 	const Card& draw_card();
 	void deal_hand(Hand& h, int n);
-	const std::vector<Card>& get_deck();
+	const std::vector<std::shared_ptr<const Card>>& get_deck();
 };

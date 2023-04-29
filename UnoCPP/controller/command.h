@@ -68,7 +68,8 @@ public:
      }
 
      void run(GameState& state, TextView& view) {
-
+         const Card &card = state.drawForPlayer(state.get_current_player());
+         view.output("Drew a " + card.format());
      }
 };
 

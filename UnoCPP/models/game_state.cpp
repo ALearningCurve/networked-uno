@@ -1,7 +1,19 @@
 #include "game_state.h"
 
 
-const Player& GameState::get_current_player() {
+const Card& GameState::draw_card()
+{
+
+	if (_draw_deck.get_card_count() == 0) {
+		if (_discard_deck.get_card_count() == 0) {
+			_draw_deck.create_n_card_decks(1); // artificially extend if we run out of cards
+		}
+		std::swap(_draw_deck, _discard_deck);
+	}
+	return _draw_deck.draw_card();
+}
+
+Player& GameState::get_current_player() {
 	return _players.at(_current_turn);
 }
 
@@ -60,4 +72,11 @@ void GameState::set_color(std::string color) {
 	else {
 		throw Ex("Given a color that does not exist");
 	}
+}
+
+const Card& GameState::drawForPlayer(Player& player)
+{
+	const Card& card = this->draw_card();
+	player.add_card(card);
+	return card;
 }

@@ -1,6 +1,6 @@
 #include "player.h"
 
-const Card& Player::play_card(Card& card){
+const Card& Player::play_card(const Card& card){
 	return _hand.remove_card(card);
 }
 
@@ -8,7 +8,7 @@ const Card& Player::play_card(int card) {
 	return _hand.remove_card(card);
 }
 
-void Player::add_card(Card& card)
+void Player::add_card(const Card& card)
 {
 	_hand.add_card(card);
 }
