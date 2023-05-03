@@ -26,3 +26,8 @@ bool Player::is_bot() const
 {
 	return _is_bot;
 }
+
+const std::string& Player::get_name() const
+{
+	return this->_name;
+}

@@ -21,4 +21,5 @@ public:
 	std::string format() const;
 	const Hand& get_hand() const;
 	bool is_bot() const;
+	const std::string& get_name() const;
 };

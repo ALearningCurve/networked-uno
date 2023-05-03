@@ -6,36 +6,33 @@ void TextController::startGame() {
 	auto turn_iter = players.begin();
 
 	while (!_quit) {
-		Player player = *turn_iter;
+		Player& player = _model.get_current_player();
 		_view.output("");
 		_view.output("[!] Its " + player.format() + "'s turn");
+		outputGameState(player);
 		playerDoTurn(player);
-		
-		
-		if (_model.get_is_reversed()) {
-			// if reversed, then it is previous person's turn
-			if (turn_iter == players.begin()) {
-				turn_iter = players.end();
-			}
-			--turn_iter;
-		}
-		else {
-			// otherwise, it is the next person's turn
-			++turn_iter;
-			if (turn_iter == players.end()) {
-				turn_iter = players.begin();
-			}
-		}
+		_model.move_to_next_player();
 	}
 
 	_view.output("[x] Thanks for playing, quitting game!");
 }
 
+void TextController::outputGameState(const Player& currentPlayer)
+{
+	_view.output("Current Game State");
+	for (const Player& player : _model.get_players()) {
+		_view.output(player.get_name() + ": with " + std::to_string(player.get_hand().get_number_cards()) + " cards");
+	}
 
-
+	std::stringstream ss;
+	ss << "Your hand";
+	for (const Card& card : _model.get_current_player().get_hand().cards()) {
+		ss << ", " << card.format();
+	}
+	_view.output(ss.str());
+}
 
 const void TextController::playerDoTurn(Player& player) {
-	
 	while (true) {
 		// every time we are here we are looking for input
 		_view.output("[ ] Enter Input ('help' for help)");

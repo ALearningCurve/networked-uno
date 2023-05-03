@@ -29,6 +29,11 @@ void GameState::flip_direction() {
 	_is_reversed = !_is_reversed;
 }
 
+void GameState::move_to_next_player()
+{
+	this->_current_turn = get_next_player();
+}
+
 int GameState::get_next_player() const {
 	int dir = _is_reversed ? -1 : 1;
 	int next_turn = _current_turn + dir;

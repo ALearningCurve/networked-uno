@@ -21,6 +21,7 @@ public:
 
 	Player& get_current_player();
 	const std::vector<Player>& get_players();
+	void move_to_next_player();
 	int get_next_player() const;
 	bool get_is_reversed() const;
 	void flip_direction();
