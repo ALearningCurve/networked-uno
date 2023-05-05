@@ -15,5 +15,6 @@ class Card {
 public:
 	Card(std::string type, std::string color = "red") : _type(type), _color(color) {}
 	std::string format() const;
-	bool operator==(Card const& rhs) const;
+	bool operator==(Card const &rhs) const;
+	bool canBePlayedOn(Card const& other) const;
 };
