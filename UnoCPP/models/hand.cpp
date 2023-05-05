@@ -29,6 +29,10 @@ const Card& Hand::remove_card(int pos)
 	return card;
 }
 
+const Card& Hand::peek_card(int pos) {
+	return _cards.at(pos);
+}
+
 const std::vector<Card>& Hand::cards() const {
 	return this->_cards;
 }

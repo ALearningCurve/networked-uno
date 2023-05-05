@@ -19,6 +19,7 @@ public:
 	* Returns the player's name as a string
 	*/
 	std::string format() const;
+	Hand& get_hand();
 	const Hand& get_hand() const;
 	bool is_bot() const;
 	const std::string& get_name() const;

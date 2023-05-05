@@ -10,9 +10,11 @@ class GameState {
 	Deck _draw_deck;
 	Deck _discard_deck;
 
+	std::string _current_color;
+	std::string _current_type;
+
 	int _current_turn = 0;
 	bool _is_reversed = false;
-	std::string _color;
 	int _draw_penalty = 0;
 	GameState() {};
 	const Card& draw_card();
@@ -29,4 +31,5 @@ public:
 	std::string get_color() const;
 	void set_color(std::string color);
 	const Card& drawForPlayer(Player& player); 
+	const void playCard(const int& card);
 };

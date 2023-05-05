@@ -19,8 +19,14 @@ bool Card::operator==(Card const& rhs) const
 	return _type == rhs._type && _color == rhs._color;
 }
 
-bool Card::canBePlayedOn(Card const& other) const
+bool Card::canBePlayedOnTopOf(Card const& other) const
 {
-	if ()
-	return false;
+	return 		
+		this->_color == "wild" ||
+		this->_color == other._color ||
+		this->_type == other._type;
 }
+
+//void Card::play(GameState& game_state)
+//{
+//}

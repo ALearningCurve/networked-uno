@@ -18,6 +18,10 @@ std::string Player::format() const {
 	return _name;
 }
 
+Hand& Player::get_hand() {
+	return _hand;
+}
+
 const Hand& Player::get_hand() const {
 	return _hand;
 }

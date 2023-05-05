@@ -1,9 +1,7 @@
 #include "game_state.h"
 
-
 const Card& GameState::draw_card()
 {
-
 	if (_draw_deck.get_card_count() == 0) {
 		if (_discard_deck.get_card_count() == 0) {
 			_draw_deck.create_n_card_decks(1); // artificially extend if we run out of cards
@@ -63,7 +61,7 @@ bool GameState::is_game_over() const {
 }
 
 std::string GameState::get_color() const {
-	return _color;
+	return _current_color;
 }
 
 void GameState::set_color(std::string color) {
@@ -72,7 +70,7 @@ void GameState::set_color(std::string color) {
 		valid = valid || CARD_COLORS[i] == color;
 	}
 	if (valid) {
-		_color = color;
+		_current_color = color;
 	}
 	else {
 		throw Ex("Given a color that does not exist");
@@ -84,4 +82,21 @@ const Card& GameState::drawForPlayer(Player& player)
 	const Card& card = this->draw_card();
 	player.add_card(card);
 	return card;
+}
+
+const void GameState::playCard(const int& cardPos)
+{
+	Player& player = get_current_player();
+	Hand& hand = player.get_hand();
+	if (cardPos < 0 || cardPos >= hand.get_number_cards()) {
+		throw std::invalid_argument("Given card must be a value from 0 to" + std::to_string(hand.get_number_cards() - 1));
+	}
+	const Card& card = hand.peek_card(cardPos);
+	card.canBePlayedOnTopOf(Card(_current_type, _current_color));
+	
+	// TODO actually play card
+
+
+	hand.remove_card(cardPos);
+	return void();
 }
