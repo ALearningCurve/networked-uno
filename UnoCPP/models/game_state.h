@@ -10,17 +10,16 @@ class GameState {
 	Deck _draw_deck;
 	Deck _discard_deck;
 
-	std::string _current_color;
-	std::string _current_type;
+	Card* _last_card;
 
 	int _current_turn = 0;
 	bool _is_reversed = false;
 	int _draw_penalty = 0;
-	GameState() {};
+	bool _next_is_skippped = false;
+	GameState();
 	const Card& draw_card();
 public:
-	GameState(Deck& deck, std::vector<Player> players) : _draw_deck(deck), _players(players) {};
-
+	GameState(Deck& deck, std::vector<Player> players);
 	Player& get_current_player();
 	const std::vector<Player>& get_players();
 	void move_to_next_player();
@@ -28,8 +27,7 @@ public:
 	bool get_is_reversed() const;
 	void flip_direction();
 	bool is_game_over() const;
-	std::string get_color() const;
-	void set_color(std::string color);
-	const Card& drawForPlayer(Player& player); 
+	const Card& get_last_card() const;
+	const Card& drawForPlayer(Player& player);
 	const void playCard(const int& card);
 };

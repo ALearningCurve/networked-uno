@@ -4,19 +4,18 @@ void Hand::add_card(const Card& card) {
 	this->_cards.push_back(card);
 }
 
-const Card& Hand::remove_card(const Card& card)
+Card& Hand::remove_card(const Card& card)
 {
 	auto it = std::find(_cards.begin(), _cards.end(), card);
 	if (it != _cards.end()) {
-		_cards.erase(it);
-		return card;
+		return *_cards.erase(it);
 	}
 	else {
 		throw Ex("Could play the desire card, it was not found");
 	}
 }
 
-const Card& Hand::remove_card(int pos)
+Card& Hand::remove_card(int pos)
 {
 	// make sure that the index is valid
 	if (pos < 0 || pos >= _cards.size()) {
@@ -24,7 +23,7 @@ const Card& Hand::remove_card(int pos)
 	}
 
 	// get the card from the vector and then return the card
-	const Card& card = _cards.at(pos);
+	Card& card = _cards.at(pos);
 	_cards.erase(std::next(_cards.begin(), pos));;
 	return card;
 }

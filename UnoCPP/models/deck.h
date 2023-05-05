@@ -10,7 +10,7 @@
 
 class Deck
 {
-	std::vector<std::shared_ptr<const Card>> _cards;
+	std::vector<std::shared_ptr<Card>> _cards;
 	void create_card_deck();
 public:
 	Deck(): Deck(2) {};
@@ -18,7 +18,7 @@ public:
 	void shuffle_deck();
 	void create_n_card_decks(int n);
 	int get_card_count();
-	const Card& draw_card();
+	Card& draw_card();
 	void deal_hand(Hand& h, int n);
-	const std::vector<std::shared_ptr<const Card>>& get_deck();
+	const std::vector<std::shared_ptr<Card>>& get_deck();
 };

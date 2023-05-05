@@ -11,6 +11,17 @@ const Card& GameState::draw_card()
 	return _draw_deck.draw_card();
 }
 
+GameState::GameState(Deck& deck, std::vector<Player> players): _draw_deck(deck), _players(players)
+{
+	if (deck.get_card_count() < 1) {
+		throw std::invalid_argument("must be at least one card in the deck to start with");
+	}
+	else if (players.size() < 2) {
+		throw std::invalid_argument("must be at least two players");
+	}
+	_last_card = &deck.draw_card();
+}
+
 Player& GameState::get_current_player() {
 	return _players.at(_current_turn);
 }
@@ -60,21 +71,8 @@ bool GameState::is_game_over() const {
 	return false;
 }
 
-std::string GameState::get_color() const {
-	return _current_color;
-}
-
-void GameState::set_color(std::string color) {
-	bool valid = false;
-	for (int i = 0; i < NUM_CARD_COLORS; ++i) {
-		valid = valid || CARD_COLORS[i] == color;
-	}
-	if (valid) {
-		_current_color = color;
-	}
-	else {
-		throw Ex("Given a color that does not exist");
-	}
+const Card& GameState::get_last_card() const {
+	return *_last_card;
 }
 
 const Card& GameState::drawForPlayer(Player& player)
@@ -86,17 +84,31 @@ const Card& GameState::drawForPlayer(Player& player)
 
 const void GameState::playCard(const int& cardPos)
 {
+	if (_draw_penalty == 0) 
+	{
+		throw std::invalid_argument("This player cannot play, they must skip!");
+	}
+	else if (_draw_penalty >= 0) 
+	{
+		throw std::invalid_argument("This player cannot play, they must draw cards!");
+	}
+
 	Player& player = get_current_player();
 	Hand& hand = player.get_hand();
 	if (cardPos < 0 || cardPos >= hand.get_number_cards()) {
 		throw std::invalid_argument("Given card must be a value from 0 to" + std::to_string(hand.get_number_cards() - 1));
 	}
 	const Card& card = hand.peek_card(cardPos);
-	card.canBePlayedOnTopOf(Card(_current_type, _current_color));
+	if (card.playable_on_top_of(*_last_card)) {
+		throw std::invalid_argument("Card must be playable on top of last card"); // TODO change state to keep track of last card
+	}
 	
-	// TODO actually play card
+	if (card.is_reverse()) {
+		_is_reversed = !_is_reversed;
+	}
+	int _draw_penalty = card.calc_draw_amount();
+	bool _next_is_skippped = card.is_skip();
 
-
-	hand.remove_card(cardPos);
+	_last_card = &hand.remove_card(cardPos);
 	return void();
 }

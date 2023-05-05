@@ -8,11 +8,11 @@ void Deck::create_card_deck() {
 
 	for (int c = 0; c < NUM_CARD_COLORS; ++c) {
 		for (int t = 0; t < NUM_COLOR_CARD_TYPES; ++t) {
-			_cards.push_back(std::make_shared<const Card>(COLOR_CARD_TYPES[t], CARD_COLORS[c]));
+			_cards.push_back(std::make_shared<Card>(COLOR_CARD_TYPES[t], CARD_COLORS[c]));
 		}
 
 		for (int t = 0; t < NUM_WILD_CARD_TYPES; ++t) {
-			_cards.push_back(std::make_shared<const Card>("Wild", WILD_CARD_TYPES[c]));
+			_cards.push_back(std::make_shared<Card>("Wild", WILD_CARD_TYPES[c]));
 		}
 	}
 }
@@ -34,16 +34,16 @@ int Deck::get_card_count() {
 	return static_cast<int>(_cards.size());
 }
 
-const Card& Deck::draw_card() {
+Card& Deck::draw_card() {
 	if (get_card_count() == 0) {
 		throw Ex("No more cards to draw");
 	}
-	const Card& back = *_cards.back();
+	Card& back = *_cards.back();
 	_cards.pop_back();
 	return back;
 }
 
-const std::vector<std::shared_ptr<const Card>>& Deck::get_deck() {
+const std::vector<std::shared_ptr<Card>>& Deck::get_deck() {
 	return _cards;
 }
 

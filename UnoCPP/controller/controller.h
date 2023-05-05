@@ -25,15 +25,7 @@ class TextController : Controller {
 
 	void outputGameState(const Player& currentPlayer);
 
-	std::map<std::string, VecCommand> make_dict() {
-		std::map<std::string, VecCommand> m;
-		m["play"] = [](auto vec) { return new PlayCommand(vec); };
-		m["draw"] = [](auto vec) {return new DrawCommand(); };
-		m["uno"] = [](auto vec) {return new UnoCommand(); };
-		m["help"] = [](auto vec) {return new HelpCommand(); };
-
-		return m;
-	}
+	std::map<std::string, VecCommand> make_dict();
 
 	const std::map<std::string, VecCommand> _command_dict = make_dict();
 

@@ -32,6 +32,17 @@ void TextController::outputGameState(const Player& currentPlayer)
 	_view.output(ss.str());
 }
 
+std::map<std::string, VecCommand> TextController::make_dict()
+{
+	std::map<std::string, VecCommand> m;
+	m["play"] = [](auto vec) { return new PlayCommand(vec); };
+	m["draw"] = [](auto vec) {return new DrawCommand(); };
+	m["uno"] = [](auto vec) {return new UnoCommand(); };
+	m["help"] = [](auto vec) {return new HelpCommand(); };
+
+	return m;
+}
+
 const void TextController::playerDoTurn(Player& player) {
 	while (true) {
 		// every time we are here we are looking for input
