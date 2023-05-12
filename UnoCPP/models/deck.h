@@ -18,7 +18,7 @@ public:
 	void shuffle_deck();
 	void create_n_card_decks(int n);
 	int get_card_count();
-	Card& draw_card();
+	std::shared_ptr<Card> draw_card();
 	void deal_hand(Hand& h, int n);
 	const std::vector<std::shared_ptr<Card>>& get_deck();
 };

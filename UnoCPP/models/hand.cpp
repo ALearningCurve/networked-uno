@@ -1,21 +1,21 @@
 #include "hand.h"
 
-void Hand::add_card(const Card& card) {
+void Hand::add_card(std::shared_ptr<Card> card) {
 	this->_cards.push_back(card);
 }
 
-Card& Hand::remove_card(const Card& card)
-{
-	auto it = std::find(_cards.begin(), _cards.end(), card);
-	if (it != _cards.end()) {
-		return *_cards.erase(it);
-	}
-	else {
-		throw Ex("Could play the desire card, it was not found");
-	}
-}
+//Card& Hand::remove_card(const Card& card)
+//{
+//	auto it = std::find(_cards.begin(), _cards.end(), card);
+//	if (it != _cards.end()) {
+//		return *_cards.erase(it);
+//	}
+//	else {
+//		throw Ex("Could play the desire card, it was not found");
+//	}
+//}
 
-Card& Hand::remove_card(int pos)
+std::shared_ptr<Card> Hand::remove_card(int pos)
 {
 	// make sure that the index is valid
 	if (pos < 0 || pos >= _cards.size()) {
@@ -23,23 +23,23 @@ Card& Hand::remove_card(int pos)
 	}
 
 	// get the card from the vector and then return the card
-	Card& card = _cards.at(pos);
+	std::shared_ptr<Card> card = _cards.at(pos);
 	_cards.erase(std::next(_cards.begin(), pos));;
 	return card;
 }
 
-const Card& Hand::peek_card(int pos) {
+const std::shared_ptr<Card> Hand::peek_card(int pos) {
 	return _cards.at(pos);
 }
 
-const std::vector<Card>& Hand::cards() const {
+const std::vector<std::shared_ptr<Card>>& Hand::cards() const {
 	return this->_cards;
 }
 
 std::string Hand::format() const {
 	std::string formatted = "";
 	for (auto i = _cards.begin(); i != _cards.end(); ++i) {
-		formatted.append((*i).format() + " ");
+		formatted.append((**i).format() + " ");
 	}
 
 	return formatted;

@@ -29,7 +29,7 @@ class TextController : Controller {
 
 	const std::map<std::string, VecCommand> _command_dict = make_dict();
 
-	const void playerDoTurn(Player& player);
+	const void playerDoTurn(Player *player);
 
 public:
 	TextController(GameState& model, TextView& view, std::istream& istream) : _model(model), _view(view), _input(istream) {};

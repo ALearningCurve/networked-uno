@@ -2,18 +2,13 @@
 #include <iostream>
 
 void Deck::create_card_deck() {
-	/*originaldeck = [UnoCard(c, v) for v in ttypes for c in colors] + \
-		[UnoCard('Wild', 'Wild') for _ in range(4)] + \
-		[UnoCard('Wild', 'Draw Four') for _ in range(4)]*/
-
 	for (int c = 0; c < NUM_CARD_COLORS; ++c) {
 		for (int t = 0; t < NUM_COLOR_CARD_TYPES; ++t) {
 			_cards.push_back(std::make_shared<Card>(COLOR_CARD_TYPES[t], CARD_COLORS[c]));
 		}
-
-		for (int t = 0; t < NUM_WILD_CARD_TYPES; ++t) {
-			_cards.push_back(std::make_shared<Card>("Wild", WILD_CARD_TYPES[c]));
-		}
+	}
+	for (int t = 0; t < NUM_WILD_CARD_TYPES; ++t) {
+		_cards.push_back(std::make_shared<Card>("wild", WILD_CARD_TYPES[t]));
 	}
 }
 
@@ -34,11 +29,11 @@ int Deck::get_card_count() {
 	return static_cast<int>(_cards.size());
 }
 
-Card& Deck::draw_card() {
+std::shared_ptr<Card> Deck::draw_card() {
 	if (get_card_count() == 0) {
 		throw Ex("No more cards to draw");
 	}
-	Card& back = *_cards.back();
+	auto back = _cards.back();
 	_cards.pop_back();
 	return back;
 }

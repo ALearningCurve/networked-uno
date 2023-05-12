@@ -1,6 +1,6 @@
 #include "game_state.h"
 
-const Card& GameState::draw_card()
+std::shared_ptr<Card> GameState::draw_card()
 {
 	if (_draw_deck.get_card_count() == 0) {
 		if (_discard_deck.get_card_count() == 0) {
@@ -11,7 +11,7 @@ const Card& GameState::draw_card()
 	return _draw_deck.draw_card();
 }
 
-GameState::GameState(Deck& deck, std::vector<Player> players): _draw_deck(deck), _players(players)
+GameState::GameState(Deck& deck, std::vector<Player*> players): _draw_deck(deck), _players(players)
 {
 	if (deck.get_card_count() < 1) {
 		throw std::invalid_argument("must be at least one card in the deck to start with");
@@ -19,14 +19,23 @@ GameState::GameState(Deck& deck, std::vector<Player> players): _draw_deck(deck),
 	else if (players.size() < 2) {
 		throw std::invalid_argument("must be at least two players");
 	}
-	_last_card = &deck.draw_card();
+	_last_card = this->draw_card();
+
+
+	std::vector<Player*>::iterator iter = players.begin();
+	for (iter; iter < players.end(); iter++)
+	{
+		for (int i = 0; i < 7; ++i) {
+			(*iter)->add_card(this->draw_card());
+		}
+	}
 }
 
-Player& GameState::get_current_player() {
+Player* GameState::get_current_player() {
 	return _players.at(_current_turn);
 }
 
-const std::vector<Player>& GameState::get_players() {
+const std::vector<Player*>& GameState::get_players() {
 	return _players;
 }
 
@@ -62,8 +71,8 @@ int GameState::get_next_player() const {
 }
 
 bool GameState::is_game_over() const {
-	for (const Player& player : _players) {
-		if (player.get_hand().get_number_cards() == 0) {
+	for (auto player : _players) {
+		if (player->get_hand().get_number_cards() == 0) {
 			return true;
 		}
 	}
@@ -71,44 +80,46 @@ bool GameState::is_game_over() const {
 	return false;
 }
 
-const Card& GameState::get_last_card() const {
-	return *_last_card;
+const std::shared_ptr<Card> GameState::get_last_card() const {
+	return _last_card;
 }
 
-const Card& GameState::drawForPlayer(Player& player)
+const std::shared_ptr<Card> GameState::draw_for_player(Player* player)
 {
-	const Card& card = this->draw_card();
-	player.add_card(card);
+	std::shared_ptr<Card> card = this->draw_card();
+	player->add_card(card);
 	return card;
 }
 
-const void GameState::playCard(const int& cardPos)
+const void GameState::play_for_player(const int& cardPos)
 {
-	if (_draw_penalty == 0) 
+	if (_next_is_skippped)
 	{
 		throw std::invalid_argument("This player cannot play, they must skip!");
 	}
-	else if (_draw_penalty >= 0) 
+	else if (_draw_penalty > 0) 
 	{
 		throw std::invalid_argument("This player cannot play, they must draw cards!");
 	}
 
-	Player& player = get_current_player();
-	Hand& hand = player.get_hand();
+	Player* player = get_current_player();
+	Hand& hand = player->get_hand();
 	if (cardPos < 0 || cardPos >= hand.get_number_cards()) {
 		throw std::invalid_argument("Given card must be a value from 0 to" + std::to_string(hand.get_number_cards() - 1));
 	}
-	const Card& card = hand.peek_card(cardPos);
-	if (card.playable_on_top_of(*_last_card)) {
-		throw std::invalid_argument("Card must be playable on top of last card"); // TODO change state to keep track of last card
+	std::shared_ptr<Card> card = hand.peek_card(cardPos);
+
+	if (card->playable_on_top_of(*_last_card)) {
+		throw std::invalid_argument("Card must be playable on top of last card");
 	}
-	
-	if (card.is_reverse()) {
+
+	if (card->is_reverse()) {
 		_is_reversed = !_is_reversed;
 	}
-	int _draw_penalty = card.calc_draw_amount();
-	bool _next_is_skippped = card.is_skip();
+	
+	int _draw_penalty = card->calc_draw_amount();
+	bool _next_is_skippped = card->is_skip();
 
-	_last_card = &hand.remove_card(cardPos);
+	_last_card = hand.remove_card(cardPos);
 	return void();
 }

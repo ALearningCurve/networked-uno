@@ -13,8 +13,9 @@ class Card {
 	std::string _type;
 	std::string _color;
 	bool _is_wild = false;
+	Card();
 public:
-	Card(std::string type, std::string color = "red");
+	Card(std::string type, std::string color);
 	std::string format() const;
 	bool operator==(Card const &rhs) const;
 	/// <summary>

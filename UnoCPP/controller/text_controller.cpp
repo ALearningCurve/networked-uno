@@ -6,10 +6,10 @@ void TextController::startGame() {
 	auto turn_iter = players.begin();
 
 	while (!_quit) {
-		Player& player = _model.get_current_player();
+		Player* player = _model.get_current_player();
 		_view.output("");
-		_view.output("[!] Its " + player.format() + "'s turn");
-		outputGameState(player);
+		_view.output("[!] Its " + player->format() + "'s turn");
+		outputGameState(*player);
 		playerDoTurn(player);
 		_model.move_to_next_player();
 	}
@@ -19,17 +19,21 @@ void TextController::startGame() {
 
 void TextController::outputGameState(const Player& currentPlayer)
 {
-	_view.output("Current Game State");
-	for (const Player& player : _model.get_players()) {
-		_view.output(player.get_name() + ": with " + std::to_string(player.get_hand().get_number_cards()) + " cards");
-	}
-
+	_view.output("[ ] Current Game State");
+	_view.output("\tLast played card: " + _model.get_last_card()->format());
 	std::stringstream ss;
-	ss << "Your hand";
-	for (const Card& card : _model.get_current_player().get_hand().cards()) {
-		ss << ", " << card.format();
+	ss << "\tYour hand: ";
+	for (const std::shared_ptr<Card> card : _model.get_current_player()->get_hand().cards()) {
+		ss << card->format();
+		if (&card != &_model.get_current_player()->get_hand().cards().back()) {
+			ss << ", ";
+		}
 	}
 	_view.output(ss.str());
+	_view.output("\tPlayer info:");
+	for (Player* player : _model.get_players()) {
+		_view.output("\t\t" + player->get_name() + ": with " + std::to_string(player->get_hand().get_number_cards()) + " cards");
+	}
 }
 
 std::map<std::string, VecCommand> TextController::make_dict()
@@ -43,7 +47,7 @@ std::map<std::string, VecCommand> TextController::make_dict()
 	return m;
 }
 
-const void TextController::playerDoTurn(Player& player) {
+const void TextController::playerDoTurn(Player *player) {
 	while (true) {
 		// every time we are here we are looking for input
 		_view.output("[ ] Enter Input ('help' for help)");
@@ -92,6 +96,8 @@ const void TextController::playerDoTurn(Player& player) {
 			}
 			catch (const std::exception& ex) {
 				_view.output(std::string("[X] ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
+				// if there was an error, let the player have the chance to retry
+				throw ex;
 			}
 			catch (...) {
 				_view.output("[X] UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());

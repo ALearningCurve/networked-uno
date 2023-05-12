@@ -68,8 +68,8 @@ public:
      }
 
      void run(GameState& state, TextView& view) {
-         const Card &card = state.drawForPlayer(state.get_current_player());
-         view.output("Drew a " + card.format());
+         std::shared_ptr<Card> card = state.draw_for_player(state.get_current_player());
+         view.output("Drew a " + card->format());
      }
 };
 
@@ -84,7 +84,7 @@ public:
     }
 
     void run(GameState& state, TextView& view) {
-        
+        state.play_for_player(_cardNum);
     }
 };
 
@@ -95,6 +95,5 @@ public:
     }
 
     void run(GameState& state, TextView& view) {
-
     }
 };

@@ -11,9 +11,9 @@ class Player {
 	bool _is_bot;
 public:
 	Player(std::string name) : _name(name), _is_bot(false) {};
-	const Card& play_card(const Card& card);
-	const Card& play_card(int card);
-	void add_card(const Card& card);
+	//const Card& play_card(std::shared_ptr<Card> card);
+	const std::shared_ptr<Card> play_card(int card);
+	void add_card(std::shared_ptr<Card> card);
 
 	/**
 	* Returns the player's name as a string
