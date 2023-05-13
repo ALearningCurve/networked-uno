@@ -91,35 +91,43 @@ const std::shared_ptr<Card> GameState::draw_for_player(Player* player)
 	return card;
 }
 
-const void GameState::play_for_player(const int& cardPos)
+const void GameState::play_for_player(Player* player, const int& cardPos)
 {
-	if (_next_is_skippped)
-	{
-		throw std::invalid_argument("This player cannot play, they must skip!");
-	}
-	else if (_draw_penalty > 0) 
-	{
-		throw std::invalid_argument("This player cannot play, they must draw cards!");
-	}
-
-	Player* player = get_current_player();
-	Hand& hand = player->get_hand();
-	if (cardPos < 0 || cardPos >= hand.get_number_cards()) {
-		throw std::invalid_argument("Given card must be a value from 0 to" + std::to_string(hand.get_number_cards() - 1));
-	}
-	std::shared_ptr<Card> card = hand.peek_card(cardPos);
-
-	if (card->playable_on_top_of(*_last_card)) {
-		throw std::invalid_argument("Card must be playable on top of last card");
+	std::string can_play_res = can_play(player, cardPos);
+	if (can_play_res != nullptr) {
+		throw std::invalid_argument(can_play_res);
 	}
 
 	if (card->is_reverse()) {
 		_is_reversed = !_is_reversed;
 	}
-	
 	int _draw_penalty = card->calc_draw_amount();
 	bool _next_is_skippped = card->is_skip();
 
 	_last_card = hand.remove_card(cardPos);
 	return void();
+}
+
+
+const std::optional<std::string> GameState::can_play(Player* player, const int& cardPos) {
+	if (_next_is_skippped)
+	{
+		return "This player cannot play, they must skip!";
+	}
+	else if (_draw_penalty > 0)
+	{
+		return "This player cannot play, they must draw cards!";
+	}
+
+	Hand& hand = player->get_hand();
+	if (cardPos < 0 || cardPos >= hand.get_number_cards()) {
+		return "Given card must be a value from 0 to" + std::to_string(hand.get_number_cards() - 1);
+	}
+	std::shared_ptr<Card> card = hand.peek_card(cardPos);
+
+	if (card->playable_on_top_of(*_last_card)) {
+		return "Card must be playable on top of last card";
+	}
+
+	return nullptr;
 }

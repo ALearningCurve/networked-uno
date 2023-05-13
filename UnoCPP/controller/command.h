@@ -84,6 +84,7 @@ public:
     }
 
     void run(GameState& state, TextView& view) {
+
         state.play_for_player(_cardNum);
     }
 };

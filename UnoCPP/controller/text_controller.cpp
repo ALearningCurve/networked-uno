@@ -10,7 +10,7 @@ void TextController::startGame() {
 		_view.output("");
 		_view.output("[!] Its " + player->format() + "'s turn");
 		outputGameState(*player);
-		playerDoTurn(player);
+		playerDoTurn();
 		_model.move_to_next_player();
 	}
 
@@ -47,7 +47,7 @@ std::map<std::string, VecCommand> TextController::make_dict()
 	return m;
 }
 
-const void TextController::playerDoTurn(Player *player) {
+const void TextController::playerDoTurn() {
 	while (true) {
 		// every time we are here we are looking for input
 		_view.output("[ ] Enter Input ('help' for help)");
@@ -97,7 +97,7 @@ const void TextController::playerDoTurn(Player *player) {
 			catch (const std::exception& ex) {
 				_view.output(std::string("[X] ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
 				// if there was an error, let the player have the chance to retry
-				throw ex;
+				continue;
 			}
 			catch (...) {
 				_view.output("[X] UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
