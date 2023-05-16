@@ -1,15 +1,7 @@
 #include "card.h"
 
-const int NUM_COLOR_CARD_TYPES = 13;
-const std::string COLOR_CARD_TYPES[NUM_COLOR_CARD_TYPES] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "skip", "draw_two", "reverse" };
-const int NUM_WILD_CARD_TYPES = 2;
-const std::string WILD_CARD_TYPES[NUM_WILD_CARD_TYPES] = { "wild", "draw_four" };
-const int NUM_CARD_COLORS = 4;
-const std::string CARD_COLORS[NUM_CARD_COLORS] = { "red", "green", "blue", "yellow" };
-
 Card::Card(std::string type, std::string color): _type(type), _color(color)
-{
-}
+{}
 
 std::string Card::format() const {
 	std::stringstream ss;
@@ -54,17 +46,12 @@ bool Card::is_skip() const
 
 bool Card::is_wild() const
 {
-	return _is_wild;
+	return _color == "wild";
 }
 
 bool Card::is_reverse() const
 {
 	return _type == "reverse";
-}
-
-void Card::set_wild_color() const
-{
-	
 }
 
 const std::string& Card::color()

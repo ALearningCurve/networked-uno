@@ -13,7 +13,7 @@ protected:
         return vec.at(index);
     }
     static int getInt(const std::vector<std::string> &vec, const int &index) {
-        const std::string &str = TextCommand::getAndEnsureIndex(vec, index);
+        const std::string& str = TextCommand::getAndEnsureIndex(vec, index);
         try {
            return std::stoi(str);
         }
@@ -27,6 +27,13 @@ protected:
 
     static const std::string& getString(const std::vector<std::string>& vec, const int& index) {
         return TextCommand::getAndEnsureIndex(vec, index);
+    }
+
+    static const std::optional<std::string> getStringOptional(const std::vector<std::string>& vec, const int& index) {
+        if (vec.size() > index) {
+            return getAndEnsureIndex(vec, index);
+        }
+        return {};
     }
 
     static bool getBool(std::string& str) {
@@ -75,17 +82,22 @@ public:
 
 class PlayCommand : public TextCommand {
     const int _cardNum;
+    const std::optional<std::string> _wildColorChoice;
 public:
     PlayCommand(int cardNum) : _cardNum(cardNum) {}
-    PlayCommand(const std::vector<std::string>& args): _cardNum(TextCommand::getInt(args, 0)) {}
+    PlayCommand(const std::vector<std::string>& args): _cardNum(TextCommand::getInt(args, 0)), _wildColorChoice(TextCommand::getStringOptional(args, 1)) {}
 
     std::string get_name() const {
         return "Play";
     }
 
     void run(GameState& state, TextView& view) {
+        auto canPlay = state.can_play(state.get_current_player(), _cardNum, _wildColorChoice);
+        if (canPlay != std::nullopt) {
+            throw std::invalid_argument("Cannot play that card: " + *canPlay);
+        }
 
-        state.play_for_player(_cardNum);
+        state.play_for_player(state.get_current_player(), _cardNum, _wildColorChoice);
     }
 };
 

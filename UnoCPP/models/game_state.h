@@ -4,6 +4,7 @@
 #include "player.h"
 #include <string>
 #include "card.h"
+#include <optional>
 
 class GameState {
 	std::vector<Player*> _players;
@@ -29,6 +30,6 @@ public:
 	bool is_game_over() const;
 	const std::shared_ptr<Card> get_last_card() const;
 	const std::shared_ptr<Card> draw_for_player(Player* player);
-	const void play_for_player(Player* player, const int& card);
-	const std::optional<std::string> can_play(Player* player, const int& card);
+	const void play_for_player(Player* player, const int& card, std::optional<std::string> optWildColor);
+	const std::optional<std::string> can_play(Player* player, const int& card, std::optional<std::string> optWildColor);
 };

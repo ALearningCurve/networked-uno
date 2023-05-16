@@ -1,7 +1,6 @@
-﻿// UnoCPP.cpp : Defines the entry point for the application.
+// UnoCPP.cpp : Defines the entry point for the application.
 //
 #include "UnoCPP.h"
-#include "models/card.h"
 using namespace std;
 
 
@@ -15,7 +14,8 @@ int main()
 	GameState game(deck, players);
 	TextView view(cout);
 	TextController controller(game, view, cin);
-
+	Card c("one", "wild");
+	cout << c.is_wild();
 	cout << "-------------------------------" << endl;
 	cout << "Starting UNO" << endl;
 	cout << "-------------------------------\n\n" << endl;

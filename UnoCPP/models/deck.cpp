@@ -2,13 +2,16 @@
 #include <iostream>
 
 void Deck::create_card_deck() {
-	for (int c = 0; c < NUM_CARD_COLORS; ++c) {
-		for (int t = 0; t < NUM_COLOR_CARD_TYPES; ++t) {
-			_cards.push_back(std::make_shared<Card>(COLOR_CARD_TYPES[t], CARD_COLORS[c]));
+	for (const auto& color : CARD_COLORS) {
+		for (const auto& type : COLOR_CARD_TYPES) {
+			_cards.push_back(std::make_shared<Card>(type, color));
 		}
 	}
-	for (int t = 0; t < NUM_WILD_CARD_TYPES; ++t) {
-		_cards.push_back(std::make_shared<Card>("wild", WILD_CARD_TYPES[t]));
+
+	for (int i = 0; i < 5; ++i) {
+		for (const auto& wildType : WILD_CARD_TYPES) {
+			_cards.push_back(std::make_shared<Card>(wildType, "wild"));
+		}
 	}
 }
 

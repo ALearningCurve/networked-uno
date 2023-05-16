@@ -20,6 +20,10 @@ GameState::GameState(Deck& deck, std::vector<Player*> players): _draw_deck(deck)
 		throw std::invalid_argument("must be at least two players");
 	}
 	_last_card = this->draw_card();
+	if (_last_card->is_wild()) {
+		// make some default card in case starting card is wild
+		_last_card = std::make_shared<Card>(COLOR_CARD_TYPES.at(0), CARD_COLORS.at(0));
+	}
 
 
 	std::vector<Player*>::iterator iter = players.begin();
@@ -91,12 +95,14 @@ const std::shared_ptr<Card> GameState::draw_for_player(Player* player)
 	return card;
 }
 
-const void GameState::play_for_player(Player* player, const int& cardPos)
+const void GameState::play_for_player(Player* player, const int& cardPos, std::optional<std::string> optWildColor)
 {
-	std::string can_play_res = can_play(player, cardPos);
-	if (can_play_res != nullptr) {
-		throw std::invalid_argument(can_play_res);
+	std::optional<std::string> can_play_res = can_play(player, cardPos, optWildColor);
+	if (can_play_res) {
+		throw std::invalid_argument(*can_play_res);
 	}
+
+	auto card = player->get_hand().peek_card(cardPos);
 
 	if (card->is_reverse()) {
 		_is_reversed = !_is_reversed;
@@ -104,12 +110,16 @@ const void GameState::play_for_player(Player* player, const int& cardPos)
 	int _draw_penalty = card->calc_draw_amount();
 	bool _next_is_skippped = card->is_skip();
 
-	_last_card = hand.remove_card(cardPos);
+	_last_card = player->get_hand().remove_card(cardPos);
+
+	if (_last_card->is_wild()) {
+		_last_card = std::make_shared<Card>(_last_card->type(), *optWildColor);
+	}
 	return void();
 }
 
 
-const std::optional<std::string> GameState::can_play(Player* player, const int& cardPos) {
+const std::optional<std::string> GameState::can_play(Player* player, const int& cardPos, std::optional<std::string> optWildColor) {
 	if (_next_is_skippped)
 	{
 		return "This player cannot play, they must skip!";
@@ -121,13 +131,31 @@ const std::optional<std::string> GameState::can_play(Player* player, const int& 
 
 	Hand& hand = player->get_hand();
 	if (cardPos < 0 || cardPos >= hand.get_number_cards()) {
-		return "Given card must be a value from 0 to" + std::to_string(hand.get_number_cards() - 1);
+		return "Given card must be a value from 0 to " + std::to_string(hand.get_number_cards() - 1);
 	}
-	std::shared_ptr<Card> card = hand.peek_card(cardPos);
+	auto card = hand.peek_card(cardPos);
 
-	if (card->playable_on_top_of(*_last_card)) {
+	if (!card->playable_on_top_of(*_last_card)) {
 		return "Card must be playable on top of last card";
 	}
 
-	return nullptr;
+	if (card->is_wild() && optWildColor == std::nullopt) {
+		return "Must specify a card color in order to play a wild card";
+	}
+
+	if (!card->is_wild() && optWildColor) {
+		return "Can only specify a card color if the card is wild";
+	}
+
+	if (optWildColor) {
+		bool found = false;
+		for (const std::string& color : CARD_COLORS) {
+			found = found || color == *optWildColor;
+		}
+		if (!found) {
+			return "Color must be one of the supported colors";
+		}
+	}
+
+	return {};
 }

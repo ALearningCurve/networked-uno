@@ -7,6 +7,7 @@
 #include <istream>
 #include <map>
 #include "command.h"
+
 #include <functional>
 
 using VecCommand = std::function<TextCommand*(const std::vector<std::string>&)>;

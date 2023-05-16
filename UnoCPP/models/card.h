@@ -1,18 +1,15 @@
 #pragma once
 #include <cstring>
 #include <sstream>
+#include <array>
 
-extern const int NUM_CARD_COLORS;
-extern const int NUM_WILD_CARD_TYPES;
-extern const int NUM_COLOR_CARD_TYPES ;
-extern const std::string COLOR_CARD_TYPES[];
-extern const std::string WILD_CARD_TYPES[];
-extern const std::string CARD_COLORS[];
+const std::array<std::string, 13> COLOR_CARD_TYPES = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "skip", "draw_two", "reverse" };
+const std::array<std::string, 2> WILD_CARD_TYPES = { "wild", "draw_four" };
+const std::array<std::string, 4> CARD_COLORS = { "red", "green", "blue", "yellow" };
 
 class Card {
 	std::string _type;
 	std::string _color;
-	bool _is_wild = false;
 	Card();
 public:
 	Card(std::string type, std::string color);
@@ -29,7 +26,6 @@ public:
 	bool is_skip() const;
 	bool is_wild() const;
 	bool is_reverse() const;
-	void set_wild_color() const;
 	const std::string& color();
 	const std::string& type();
 };
