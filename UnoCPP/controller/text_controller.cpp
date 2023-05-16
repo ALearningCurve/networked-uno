@@ -45,10 +45,10 @@ void TextController::outputGameState(const Player& currentPlayer)
 std::map<std::string, VecCommand> TextController::make_dict()
 {
 	std::map<std::string, VecCommand> m;
-	m["play"] = [](auto vec) { return new PlayCommand(vec); };
-	m["draw"] = [](auto vec) {return new DrawCommand(); };
-	m["uno"] = [](auto vec) {return new UnoCommand(); };
-	m["help"] = [](auto vec) {return new HelpCommand(); };
+	m["play"] = [](auto str) { return std::make_shared<PlayCommand>(str); };
+	m["draw"] = [](auto str) { return std::make_shared<DrawCommand>(); };
+	//m["uno"] = [](auto str) { return std::make_shared<UnoCommand>(); }; disabled in single mode text
+	m["help"] = [](auto str) { return std::make_shared<HelpCommand>(); };
 
 	return m;
 }
@@ -82,7 +82,7 @@ const void TextController::playerDoTurn() {
 			std::vector<std::string> vec;
 			split_str(uinput, " ", vec);
 			vec.erase(vec.begin()); // get rid of the first input (which is the command name
-			TextCommand* command;
+			std::shared_ptr<TextCommand> command;
 
 			try {
 				command = commandEntry->second(vec);
@@ -109,7 +109,6 @@ const void TextController::playerDoTurn() {
 				_view.output("[X] UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
 				std::rethrow_exception(std::current_exception());
 			}
-			delete command;
 			return;
 		}
 	}

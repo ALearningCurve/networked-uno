@@ -32,4 +32,5 @@ public:
 	const std::shared_ptr<Card> draw_for_player(Player* player);
 	const void play_for_player(Player* player, const int& card, std::optional<std::string> optWildColor);
 	const std::optional<std::string> can_play(Player* player, const int& card, std::optional<std::string> optWildColor);
+	void player_said_uno(Player* player);
 };

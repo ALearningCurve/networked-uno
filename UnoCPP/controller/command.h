@@ -108,5 +108,6 @@ public:
     }
 
     void run(GameState& state, TextView& view) {
+        state.player_said_uno(state.get_current_player());
     }
 };

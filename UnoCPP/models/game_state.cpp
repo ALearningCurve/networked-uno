@@ -100,6 +100,8 @@ const std::shared_ptr<Card> GameState::get_last_card() const {
 	return _last_card;
 }
 
+
+
 const std::shared_ptr<Card> GameState::draw_for_player(Player* player)
 {
 	if (player != get_current_player()) {
@@ -176,4 +178,34 @@ const std::optional<std::string> GameState::can_play(Player* player, const int& 
 	}
 
 	return {};
+}
+
+void GameState::player_said_uno(Player* caller)
+{
+	bool didSomething = false;
+	if (caller == get_current_player()) {
+		if (caller->is_uno_vulnerable()) {
+			caller->set_uno_immunity(true);
+			didSomething = true;
+		}
+	}
+	for (Player * player : _players) {
+		if (caller != player && player->is_uno_vulnerable()) {
+			int i = 4;
+			didSomething = true;
+			while (i-- > 0) {
+				std::shared_ptr<Card> card = this->draw_card();
+				player->add_card(card);
+			}
+		}
+	}
+
+	if (!didSomething) {
+		if (caller == get_current_player()) {
+			throw std::invalid_argument("Caller is not vulnerable to uno nor is any one else!");
+		}
+		else {
+			throw std::invalid_argument("No one is uno vulnerable");
+		}
+	}
 }

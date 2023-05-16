@@ -7,10 +7,10 @@
 #include <istream>
 #include <map>
 #include "command.h"
-
+#include <memory>
 #include <functional>
 
-using VecCommand = std::function<TextCommand*(const std::vector<std::string>&)>;
+using VecCommand = std::function<std::shared_ptr<TextCommand>(const std::vector<std::string>&)>;
 
 class Controller {
 public:
