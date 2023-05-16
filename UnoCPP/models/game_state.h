@@ -27,7 +27,7 @@ public:
 	int get_next_player() const;
 	bool get_is_reversed() const;
 	void flip_direction();
-	bool is_game_over() const;
+	const Player* get_winner() const;
 	const std::shared_ptr<Card> get_last_card() const;
 	const std::shared_ptr<Card> draw_for_player(Player* player);
 	const void play_for_player(Player* player, const int& card, std::optional<std::string> optWildColor);

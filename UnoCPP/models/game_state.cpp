@@ -29,7 +29,7 @@ GameState::GameState(Deck& deck, std::vector<Player*> players): _draw_deck(deck)
 	std::vector<Player*>::iterator iter = players.begin();
 	for (iter; iter < players.end(); iter++)
 	{
-		for (int i = 0; i < 7; ++i) {
+		for (int i = 0; i < 2; ++i) {
 			(*iter)->add_card(this->draw_card());
 		}
 	}
@@ -53,6 +53,9 @@ void GameState::flip_direction() {
 
 void GameState::start_next_turn()
 {
+	if (this->get_winner()) {
+		throw std::runtime_error("Game is over, cannot select another player!");
+	}
 	this->_current_turn = get_next_player();
 	if (this->_draw_penalty > 0) {
 		while (_draw_penalty-- > 0) {
@@ -84,14 +87,13 @@ int GameState::get_next_player() const {
 	return next_turn;
 }
 
-bool GameState::is_game_over() const {
+const Player* GameState::get_winner() const {
 	for (auto player : _players) {
 		if (player->get_hand().get_number_cards() == 0) {
-			return true;
+			return player;
 		}
 	}
-
-	return false;
+	return nullptr;
 }
 
 const std::shared_ptr<Card> GameState::get_last_card() const {

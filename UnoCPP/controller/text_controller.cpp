@@ -5,13 +5,19 @@ void TextController::startGame() {
 	auto players = _model.get_players();
 	auto turn_iter = players.begin();
 
-	while (!_quit) {
+	const Player* winner = _model.get_winner();
+	while (!(_quit || winner)) {
 		Player* player = _model.get_current_player();
 		_view.output("");
 		_view.output("[!] Its " + player->format() + "'s turn");
 		outputGameState(*player);
 		playerDoTurn();
-		_model.start_next_turn();
+		if (!(winner = _model.get_winner())) {
+			_model.start_next_turn();
+		}
+	}
+	if (winner) {
+		_view.output("[!] Congrats " + winner->get_name() + ", you have won!");
 	}
 
 	_view.output("[x] Thanks for playing, quitting game!");
