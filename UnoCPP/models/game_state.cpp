@@ -39,7 +39,7 @@ Player* GameState::get_current_player() {
 	return _players.at(_current_turn);
 }
 
-const std::vector<Player*>& GameState::get_players() {
+const std::vector<Player *>& GameState::get_players() {
 	return _players;
 }
 
@@ -51,9 +51,19 @@ void GameState::flip_direction() {
 	_is_reversed = !_is_reversed;
 }
 
-void GameState::move_to_next_player()
+void GameState::start_next_turn()
 {
 	this->_current_turn = get_next_player();
+	if (this->_draw_penalty > 0) {
+		while (_draw_penalty-- > 0) {
+			draw_for_player(this->get_current_player());
+		}
+	}
+
+	if (this->_next_is_skippped) {
+		this->_current_turn = get_next_player();
+		this->_next_is_skippped = false;
+	}
 }
 
 int GameState::get_next_player() const {
@@ -90,6 +100,10 @@ const std::shared_ptr<Card> GameState::get_last_card() const {
 
 const std::shared_ptr<Card> GameState::draw_for_player(Player* player)
 {
+	if (player != get_current_player()) {
+		throw std::invalid_argument("It is not your turn!");
+	}
+	
 	std::shared_ptr<Card> card = this->draw_card();
 	player->add_card(card);
 	return card;
@@ -107,8 +121,8 @@ const void GameState::play_for_player(Player* player, const int& cardPos, std::o
 	if (card->is_reverse()) {
 		_is_reversed = !_is_reversed;
 	}
-	int _draw_penalty = card->calc_draw_amount();
-	bool _next_is_skippped = card->is_skip();
+	_draw_penalty = card->calc_draw_amount();
+	_next_is_skippped = card->is_skip() || _draw_penalty > 0;
 
 	_last_card = player->get_hand().remove_card(cardPos);
 
@@ -118,8 +132,10 @@ const void GameState::play_for_player(Player* player, const int& cardPos, std::o
 	return void();
 }
 
-
 const std::optional<std::string> GameState::can_play(Player* player, const int& cardPos, std::optional<std::string> optWildColor) {
+	if (player != this->get_current_player()) {
+		return "It is not this player's turn!";
+	}
 	if (_next_is_skippped)
 	{
 		return "This player cannot play, they must skip!";

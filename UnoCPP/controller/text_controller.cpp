@@ -11,7 +11,7 @@ void TextController::startGame() {
 		_view.output("[!] Its " + player->format() + "'s turn");
 		outputGameState(*player);
 		playerDoTurn();
-		_model.move_to_next_player();
+		_model.start_next_turn();
 	}
 
 	_view.output("[x] Thanks for playing, quitting game!");

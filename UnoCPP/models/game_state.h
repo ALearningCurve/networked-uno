@@ -23,7 +23,7 @@ public:
 	GameState(Deck& deck, std::vector<Player*> players);
 	Player* get_current_player();
 	const std::vector<Player*>& get_players();
-	void move_to_next_player();
+	void start_next_turn();
 	int get_next_player() const;
 	bool get_is_reversed() const;
 	void flip_direction();
