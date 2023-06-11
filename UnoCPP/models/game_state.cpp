@@ -151,7 +151,7 @@ const std::optional<std::string> GameState::can_play(Player* player, const int& 
 
 	Hand& hand = player->get_hand();
 	if (cardPos < 0 || cardPos >= hand.get_number_cards()) {
-		return "Given card must be a value from 0 to " + std::to_string(hand.get_number_cards() - 1);
+		return "Given card index must be a number from 0 to " + std::to_string(hand.get_number_cards() - 1);
 	}
 	auto card = hand.peek_card(cardPos);
 

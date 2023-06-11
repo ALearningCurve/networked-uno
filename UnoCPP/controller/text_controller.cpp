@@ -26,10 +26,11 @@ void TextController::startGame() {
 std::map<std::string, VecCommand> TextController::make_dict()
 {
 	std::map<std::string, VecCommand> m;
-	m["play"] = [](auto str) { return std::make_shared<PlayCommand>(str); };
-	m["draw"] = [](auto str) { return std::make_shared<DrawCommand>(); };
-	m["uno"] = [](auto str) { return std::make_shared<UnoCommand>(); };
-	m["help"] = [](auto str) { return std::make_shared<HelpCommand>(); };
+	m["play"]		= [](auto args) { return std::make_shared<PlayCommand>(args); };
+	m["draw"]		= [](auto args) { return std::make_shared<DrawCommand>(); };
+	m["uno"]		= [](auto args) { return std::make_shared<UnoCommand>(); };
+	m["help"]		= [](auto args) { return std::make_shared<HelpCommand>(); };
+	m["play+uno"]	= [](auto args) { return std::make_shared<PlayThenUnoCommand>(args); };
 
 	return m;
 }

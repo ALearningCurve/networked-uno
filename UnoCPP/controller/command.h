@@ -59,11 +59,15 @@ public:
     void run(GameState& state, TextView& view) {
         view.info(
             "Help Menu: \n"
-            "  h: help \n"
-            "  draw: draw a card\n"
-            "  play: play a card\n"
-            "  uno: shout uno\n"
-            "  q: quit"
+            "  h:           show help menu\n"
+            "  draw:        draw a card from the deck\n"
+            "  play:        play a card. Takes following arguments: \n"
+            "                   - index: numeric index of card in your hand (starting from 0)\n" 
+            "                   - color: if card being played is wild, must specify color of red, green, blue, or yellow)\n"
+            "  play+uno:    plays a card and then calls uno. do this if after you play a card you would\n"
+            "               only have 1 card to make yourself immune to unos! Takes same arguments as \"play\" command\n"
+            "  uno:         shout uno! Note, to say uno on the turn you played a card, use the \"play+uno\" command\n"
+            "  q:           quits the game"
         ); 
     }
 
@@ -94,7 +98,6 @@ class PlayCommand : public TextCommand {
     const int _cardNum;
     const std::optional<std::string> _wildColorChoice;
 public:
-    PlayCommand(int cardNum) : _cardNum(cardNum) {}
     PlayCommand(const std::vector<std::string>& args): _cardNum(TextCommand::getInt(args, 0)), _wildColorChoice(TextCommand::getStringOptional(args, 1)) {}
 
     std::string get_name() const {
@@ -127,5 +130,29 @@ public:
 
     bool takes_whole_turn() const {
         return false;
+    }
+};
+
+class PlayThenUnoCommand : public TextCommand {
+    PlayCommand _play;
+    UnoCommand _uno;
+public:
+    PlayThenUnoCommand(const std::vector<std::string>& args) : _play(args), _uno() {}
+
+    std::string get_name() const {
+        return "Play then Uno";
+    }
+
+    void run(GameState& state, TextView& view) {
+        // make sure this command can be run (player must have only 1 card)
+        if (state.get_current_player()->get_hand().get_number_cards() != 2) {
+            throw std::invalid_argument("Can only use this command when you have 2 cards in your hand!");
+        }
+        _play.run(state, view);
+        _uno.run(state, view);
+    }
+
+    bool takes_whole_turn() const {
+        return true;
     }
 };

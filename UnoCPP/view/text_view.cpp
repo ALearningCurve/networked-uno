@@ -51,11 +51,12 @@ std::string TextView::stringify_card(const Card& card)
 std::string TextView::stringify_hand(const Hand& hand, const std::string& indent)
 {
 	std::stringstream ss;
+	int counter = 0;
 	for (const std::shared_ptr<Card> card : hand.cards()) {
 		if (card != *hand.cards().begin()) {
 			ss << '\n';
 		}
-		ss << indent << stringify_card(*card);
+		ss << indent << "[" << counter++ << "] " << stringify_card(*card);
 
 	}
 	return ss.str();
