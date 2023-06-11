@@ -8,24 +8,17 @@ const std::array<std::string, 2> WILD_CARD_TYPES = { "wild", "draw_four" };
 const std::array<std::string, 4> CARD_COLORS = { "red", "green", "blue", "yellow" };
 
 class Card {
-	std::string _type;
-	std::string _color;
+	const std::string _type;
+	const std::string _color;
 	Card();
 public:
-	Card(std::string type, std::string color);
-	std::string format() const;
+	Card(std::string type, std::string color) : _type(type), _color(color) {};
 	bool operator==(Card const &rhs) const;
-	/// <summary>
-	/// Whether or not THIS card can be played on top of the other card. This card can be played on other card if either
-	///  this card has same color, this card has same number, or this card is wild.
-	/// </summary>
-	/// <param name="other">the card to check if this card can be played on top of</param>
-	/// <returns>whether or not it can be played on top of the other card</returns>
 	bool playable_on_top_of(Card const &other) const;
 	int calc_draw_amount() const;
 	bool is_skip() const;
 	bool is_wild() const;
 	bool is_reverse() const;
-	const std::string& color();
-	const std::string& type();
+	const std::string& color() const;
+	const std::string& type() const;
 };

@@ -1,14 +1,5 @@
 #include "card.h"
 
-Card::Card(std::string type, std::string color): _type(type), _color(color)
-{}
-
-std::string Card::format() const {
-	std::stringstream ss;
-	ss << this->_color << " " << this->_type;
-	std::string s = ss.str();
-	return s;
-}
 
 bool Card::operator==(Card const& rhs) const
 {
@@ -54,12 +45,12 @@ bool Card::is_reverse() const
 	return _type == "reverse";
 }
 
-const std::string& Card::color()
+const std::string& Card::color() const
 {
 	return _color;
 }
 
-const std::string& Card::type()
+const std::string& Card::type() const
 {
 	return _type;
 }

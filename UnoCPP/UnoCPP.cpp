@@ -1,8 +1,6 @@
 // UnoCPP.cpp : Defines the entry point for the application.
 //
 #include "UnoCPP.h"
-using namespace std;
-
 
 int main()
 {
@@ -12,11 +10,8 @@ int main()
 	//Player p3("player 3");
 	std::vector<Player*> players = { &p1, &p2 };
 	GameState game(deck, players);
-	TextView view(cout);
-	TextController controller(game, view, cin);
-	cout << "-------------------------------" << endl;
-	cout << "Starting UNO" << endl;
-	cout << "-------------------------------\n\n" << endl;
+	TextView view(std::cout);
+	TextController controller(game, view, std::cin);
 	controller.startGame();
 	return 0;
 }

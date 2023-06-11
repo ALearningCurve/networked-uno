@@ -1,45 +1,25 @@
 #include "controller.h"
 
 void TextController::startGame() {
-	_view.output("[ ] Starting Game in Mode: Text");
+	_view.alert("Starting Game in Mode: Text");
 	auto players = _model.get_players();
 	auto turn_iter = players.begin();
 
 	const Player* winner = _model.get_winner();
 	while (!(_quit || winner)) {
 		Player* player = _model.get_current_player();
-		_view.output("");
-		_view.output("[!] Its " + player->format() + "'s turn");
-		outputGameState(*player);
+		_view.alert("Its " + _view.stringify_player(*player) + "'s turn");
+		_view.info(_view.stringify_current_turn(_model));
 		playerDoTurn();
 		if (!(winner = _model.get_winner())) {
 			_model.start_next_turn();
 		}
 	}
 	if (winner) {
-		_view.output("[!] Congrats " + winner->get_name() + ", you have won!");
+		_view.alert("Congrats " + _view.stringify_player(*winner) + ", you have won!");
 	}
 
-	_view.output("[x] Thanks for playing, quitting game!");
-}
-
-void TextController::outputGameState(const Player& currentPlayer)
-{
-	_view.output("[ ] Current Game State");
-	_view.output("\tLast played card: " + _model.get_last_card()->format());
-	std::stringstream ss;
-	ss << "\tYour hand: ";
-	for (const std::shared_ptr<Card> card : _model.get_current_player()->get_hand().cards()) {
-		ss << card->format();
-		if (&card != &_model.get_current_player()->get_hand().cards().back()) {
-			ss << ", ";
-		}
-	}
-	_view.output(ss.str());
-	_view.output("\tPlayer info:");
-	for (Player* player : _model.get_players()) {
-		_view.output("\t\t" + player->get_name() + ": with " + std::to_string(player->get_hand().get_number_cards()) + " cards");
-	}
+	_view.alert("Thanks for playing, quitting game!");
 }
 
 std::map<std::string, VecCommand> TextController::make_dict()
@@ -56,7 +36,7 @@ std::map<std::string, VecCommand> TextController::make_dict()
 const void TextController::playerDoTurn() {
 	while (true) {
 		// every time we are here we are looking for input
-		_view.output("[ ] Enter Input ('help' for help)");
+		_view.alert("Enter Input ('help' for help)");
 
 		if (_input.eof()) {
 			throw Ex("Unexpectedly ran out of input...");
@@ -76,7 +56,7 @@ const void TextController::playerDoTurn() {
 		const auto commandEntry = _command_dict.find(command_name);
 
 		if (commandEntry == _command_dict.end()) {
-			_view.output("[X] Unknown Command: '" + command_name + "'");
+			_view.error("Unknown Command: '" + command_name + "'");
 		}
 		else {
 			std::vector<std::string> vec;
@@ -88,11 +68,11 @@ const void TextController::playerDoTurn() {
 				command = commandEntry->second(vec);
 			}
 			catch (const std::exception& ex) {
-				_view.output(std::string("[X] BAD INPUT: ") + ex.what());
+				_view.error(std::string("BAD INPUT: ") + ex.what());
 				continue;
 			} 
 			catch (...) {
-				return _view.output("[X] BAD INPUT: failed to create command with given parameters");
+				return _view.error("BAD INPUT: failed to create command with given parameters");
 				std::rethrow_exception(std::current_exception());
 				continue;
 			}
@@ -101,12 +81,12 @@ const void TextController::playerDoTurn() {
 				command->run(this->_model, this->_view);
 			}
 			catch (const std::exception& ex) {
-				_view.output(std::string("[X] ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
+				_view.error(std::string("ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
 				// if there was an error, let the player have the chance to retry
 				continue;
 			}
 			catch (...) {
-				_view.output("[X] UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
+				_view.error("UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
 				std::rethrow_exception(std::current_exception());
 			}
 			return;

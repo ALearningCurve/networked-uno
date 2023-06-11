@@ -16,11 +16,6 @@ void Player::add_card(std::shared_ptr<Card> card)
 	_hand.add_card(card);
 }
 
-
-std::string Player::format() const {
-	return _name;
-}
-
 Hand& Player::get_hand() {
 	return _hand;
 }

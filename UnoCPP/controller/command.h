@@ -3,6 +3,7 @@
 #include <vector>
 #include "../helpers/stringutils.h"
 
+
 // Base class
 class TextCommand {
 protected: 
@@ -55,7 +56,7 @@ public:
     }
 
     void run(GameState& state, TextView& view) {
-        view.output(
+        view.info(
             "Help Menu: \n"
             "  h: help \n"
             "  draw: draw a card\n"
@@ -76,7 +77,7 @@ public:
 
      void run(GameState& state, TextView& view) {
          std::shared_ptr<Card> card = state.draw_for_player(state.get_current_player());
-         view.output("Drew a " + card->format());
+         view.info("Drew a " + view.stringify_card(*card));
      }
 };
 

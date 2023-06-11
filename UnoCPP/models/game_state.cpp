@@ -39,7 +39,7 @@ Player* GameState::get_current_player() {
 	return _players.at(_current_turn);
 }
 
-const std::vector<Player *>& GameState::get_players() {
+const std::vector<Player*>& GameState::get_players() {
 	return _players;
 }
 

@@ -24,8 +24,6 @@ class TextController : Controller {
 	std::istream& _input;
 	bool _quit = false;
 
-	void outputGameState(const Player& currentPlayer);
-
 	std::map<std::string, VecCommand> make_dict();
 
 	const std::map<std::string, VecCommand> _command_dict = make_dict();

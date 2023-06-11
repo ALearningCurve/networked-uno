@@ -13,6 +13,5 @@ public:
 	std::shared_ptr<Card> remove_card(int pos);
 	const std::shared_ptr<Card> peek_card(int pos);
 	const std::vector<std::shared_ptr<Card>>& cards() const;
-	std::string format() const;
 	int get_number_cards() const;
 };

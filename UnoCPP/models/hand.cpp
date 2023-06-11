@@ -36,15 +36,6 @@ const std::vector<std::shared_ptr<Card>>& Hand::cards() const {
 	return this->_cards;
 }
 
-std::string Hand::format() const {
-	std::string formatted = "";
-	for (auto i = _cards.begin(); i != _cards.end(); ++i) {
-		formatted.append((**i).format() + " ");
-	}
-
-	return formatted;
-}
-
 int Hand::get_number_cards() const {
 	return static_cast<int>(_cards.size());
 }
