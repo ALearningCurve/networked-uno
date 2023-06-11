@@ -24,7 +24,8 @@ std::string TextView::stringify_current_turn(GameState& game)
 {
 	std::stringstream ss;
 	ss << "Current Game State:"; 
-	ss << "\n\tLast played card: " << stringify_card(*game.get_last_card());
+	ss << "\n\tLast played card: ";
+	ss << "" << stringify_card(*game.get_last_card());
 	ss << "\n\tYour hand: ";
 	ss << "\n" << stringify_hand(game.get_current_player()->get_hand(), "\t\t");
 	ss << "\n\tPlayer info:";
@@ -51,10 +52,11 @@ std::string TextView::stringify_hand(const Hand& hand, const std::string& indent
 {
 	std::stringstream ss;
 	for (const std::shared_ptr<Card> card : hand.cards()) {
-		ss << indent << stringify_card(*card);
-		if (&card != &hand.cards().back()) {
-			ss << "\n";
+		if (card != *hand.cards().begin()) {
+			ss << '\n';
 		}
+		ss << indent << stringify_card(*card);
+
 	}
 	return ss.str();
 }

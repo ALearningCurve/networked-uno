@@ -45,6 +45,7 @@ public:
     virtual ~TextCommand() = default;
     virtual void run(GameState &state, TextView &view) = 0;
     virtual std::string get_name() const = 0;
+    virtual bool takes_whole_turn() const = 0;
 };
 
 class HelpCommand : public TextCommand {
@@ -63,7 +64,11 @@ public:
             "  play: play a card\n"
             "  uno: shout uno\n"
             "  q: quit"
-        );
+        ); 
+    }
+
+    bool takes_whole_turn() const {
+        return false;
     }
 };
 
@@ -78,6 +83,10 @@ public:
      void run(GameState& state, TextView& view) {
          std::shared_ptr<Card> card = state.draw_for_player(state.get_current_player());
          view.info("Drew a " + view.stringify_card(*card));
+     }
+
+     bool takes_whole_turn() const {
+         return true;
      }
 };
 
@@ -100,6 +109,10 @@ public:
 
         state.play_for_player(state.get_current_player(), _cardNum, _wildColorChoice);
     }
+
+    bool takes_whole_turn() const {
+        return true;
+    }
 };
 
 class UnoCommand : public TextCommand {
@@ -110,5 +123,9 @@ public:
 
     void run(GameState& state, TextView& view) {
         state.player_said_uno(state.get_current_player());
+    }
+
+    bool takes_whole_turn() const {
+        return false;
     }
 };

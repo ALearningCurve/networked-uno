@@ -8,10 +8,11 @@ void TextController::startGame() {
 	const Player* winner = _model.get_winner();
 	while (!(_quit || winner)) {
 		Player* player = _model.get_current_player();
-		_view.alert("Its " + _view.stringify_player(*player) + "'s turn");
+		_view.info("Its " + _view.stringify_player(*player) + "'s turn");
 		_view.info(_view.stringify_current_turn(_model));
 		playerDoTurn();
 		if (!(winner = _model.get_winner())) {
+			_view.info(_view.stringify_player(*player) + "'s turn is over\n\n");
 			_model.start_next_turn();
 		}
 	}
@@ -27,7 +28,7 @@ std::map<std::string, VecCommand> TextController::make_dict()
 	std::map<std::string, VecCommand> m;
 	m["play"] = [](auto str) { return std::make_shared<PlayCommand>(str); };
 	m["draw"] = [](auto str) { return std::make_shared<DrawCommand>(); };
-	//m["uno"] = [](auto str) { return std::make_shared<UnoCommand>(); }; disabled in single mode text
+	m["uno"] = [](auto str) { return std::make_shared<UnoCommand>(); };
 	m["help"] = [](auto str) { return std::make_shared<HelpCommand>(); };
 
 	return m;
@@ -89,7 +90,10 @@ const void TextController::playerDoTurn() {
 				_view.error("UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
 				std::rethrow_exception(std::current_exception());
 			}
-			return;
+
+			if (command->takes_whole_turn()) {
+				return;
+			}
 		}
 	}
 }
