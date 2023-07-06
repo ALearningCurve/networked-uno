@@ -10,8 +10,9 @@ int main()
 	//Player p3("player 3");
 	std::vector<Player*> players = { &p1, &p2 };
 	GameState game(deck, players);
-	TextView view(std::cout);
-	TextController controller(game, view, std::cin);
+	StreamView view(std::cout);
+	TextView* tv = &view;
+	TextController controller(game, tv, std::cin);
 	controller.startGame();
 	return 0;
 }

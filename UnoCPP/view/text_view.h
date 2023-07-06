@@ -4,18 +4,25 @@
 #include "../models/game_state.h"
 
 class TextView {
+public:
+	virtual void error(const std::string text) = 0;
+	virtual void info(const std::string text) = 0;
+	virtual void alert(const std::string text) = 0;
+
+	static std::string stringify_current_turn(GameState& game);
+	static std::string stringify_player(const Player& player);
+	static std::string stringify_card(const Card& card);
+	static std::string stringify_hand(const Hand& hand, const std::string& indent = "");
+};
+
+class StreamView: public TextView {
 	std::ostream& _out;
 	void output_message(const std::string& msg);
 
 public:
-	TextView(std::ostream& out) : _out(out) {};
+	StreamView(std::ostream& out) : _out(out) {};
 
 	void error(const std::string text);
 	void info(const std::string text);
 	void alert(const std::string text);
-
-	std::string stringify_current_turn(GameState& game);
-	std::string stringify_player(const Player& player);
-	std::string stringify_card(const Card& card);
-	std::string stringify_hand(const Hand& hand, const std::string& indent="");
 };

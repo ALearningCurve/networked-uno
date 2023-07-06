@@ -1,21 +1,21 @@
 #include "text_view.h"
 
-void TextView::error(const std::string text)
+void StreamView::error(const std::string text)
 {
 	output_message("[X] " + text);
 }
 
-void TextView::info(const std::string text)
+void StreamView::info(const std::string text)
 {
 	output_message("[ ] " + text);
 }
 
-void TextView::alert(const std::string text)
+void StreamView::alert(const std::string text)
 {
 	output_message("[~] " + text);
 }
 
-void TextView::output_message(const std::string& msg)
+void StreamView::output_message(const std::string& msg)
 {
 	_out << msg << std::endl;
 }

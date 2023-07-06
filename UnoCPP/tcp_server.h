@@ -8,6 +8,7 @@
 #include <mutex>
 #include <vector>
 #include <map>
+#include <set>
 #pragma comment (lib, "ws2_32.lib")
 
 class TcpServer {

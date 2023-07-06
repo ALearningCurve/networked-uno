@@ -43,7 +43,7 @@ protected:
 
 public:
     virtual ~TextCommand() = default;
-    virtual void run(GameState &state, TextView &view) = 0;
+    virtual void run(GameState &state, TextView* view) = 0;
     virtual std::string get_name() const = 0;
     virtual bool takes_whole_turn() const = 0;
 };
@@ -56,8 +56,8 @@ public:
         return "help";
     }
 
-    void run(GameState& state, TextView& view) {
-        view.info(
+    void run(GameState& state, TextView* view) {
+        view->info(
             "Help Menu: \n"
             "  h:           show help menu\n"
             "  draw:        draw a card from the deck\n"
@@ -84,9 +84,9 @@ public:
         return "Draw";
      }
 
-     void run(GameState& state, TextView& view) {
+     void run(GameState& state, TextView* view) {
          std::shared_ptr<Card> card = state.draw_for_player(state.get_current_player());
-         view.info("Drew a " + view.stringify_card(*card));
+         view->info("Drew a " + view->stringify_card(*card));
      }
 
      bool takes_whole_turn() const {
@@ -104,7 +104,7 @@ public:
         return "Play";
     }
 
-    void run(GameState& state, TextView& view) {
+    void run(GameState& state, TextView* view) {
         auto canPlay = state.can_play(state.get_current_player(), _cardNum, _wildColorChoice);
         if (canPlay != std::nullopt) {
             throw std::invalid_argument("Cannot play that card: " + *canPlay);
@@ -124,7 +124,7 @@ public:
         return "Uno";
     }
 
-    void run(GameState& state, TextView& view) {
+    void run(GameState& state, TextView* view) {
         state.player_said_uno(state.get_current_player());
     }
 
@@ -143,7 +143,7 @@ public:
         return "Play then Uno";
     }
 
-    void run(GameState& state, TextView& view) {
+    void run(GameState& state, TextView* view) {
         // make sure this command can be run (player must have only 1 card)
         if (state.get_current_player()->get_hand().get_number_cards() != 2) {
             throw std::invalid_argument("Can only use this command when you have 2 cards in your hand!");
