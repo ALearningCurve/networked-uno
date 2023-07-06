@@ -104,5 +104,8 @@
     <ClInclude Include="controller\controller.h">
       <Filter>Header Files\controller</Filter>
     </ClInclude>
+    <ClInclude Include="tcp_server.h">
+      <Filter>Header Files\controller</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

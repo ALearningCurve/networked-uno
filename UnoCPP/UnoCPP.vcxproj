@@ -40,6 +40,7 @@
     <ClInclude Include="models\hand.h" />
     <ClInclude Include="models\models.h" />
     <ClInclude Include="models\player.h" />
+    <ClInclude Include="tcp_server.h" />
     <ClInclude Include="UnoCPP.h" />
     <ClInclude Include="view\text_view.h" />
   </ItemGroup>
