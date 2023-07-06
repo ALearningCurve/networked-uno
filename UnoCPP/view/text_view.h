@@ -4,10 +4,12 @@
 #include "../models/game_state.h"
 
 class TextView {
+	virtual void output_message(const std::string& msg) = 0;
+
 public:
-	virtual void error(const std::string text) = 0;
-	virtual void info(const std::string text) = 0;
-	virtual void alert(const std::string text) = 0;
+	void error(const std::string text);
+	void info(const std::string text);
+	void alert(const std::string text);
 
 	static std::string stringify_current_turn(GameState& game);
 	static std::string stringify_player(const Player& player);
@@ -21,8 +23,4 @@ class StreamView: public TextView {
 
 public:
 	StreamView(std::ostream& out) : _out(out) {};
-
-	void error(const std::string text);
-	void info(const std::string text);
-	void alert(const std::string text);
 };

@@ -1,23 +1,18 @@
 #include "text_view.h"
 
-void StreamView::error(const std::string text)
+void TextView::error(const std::string text)
 {
 	output_message("[X] " + text);
 }
 
-void StreamView::info(const std::string text)
+void TextView::info(const std::string text)
 {
 	output_message("[ ] " + text);
 }
 
-void StreamView::alert(const std::string text)
+void TextView::alert(const std::string text)
 {
 	output_message("[~] " + text);
-}
-
-void StreamView::output_message(const std::string& msg)
-{
-	_out << msg << std::endl;
 }
 
 std::string TextView::stringify_current_turn(GameState& game)
@@ -60,4 +55,9 @@ std::string TextView::stringify_hand(const Hand& hand, const std::string& indent
 
 	}
 	return ss.str();
+}
+
+void StreamView::output_message(const std::string& msg)
+{
+	_out << msg << std::endl;
 }
