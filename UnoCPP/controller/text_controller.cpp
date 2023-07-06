@@ -99,3 +99,59 @@ const void TextController::playerDoTurn() {
 	}
 }
 
+
+
+void SimpleSocketBasedController::startGame() {
+	server.start();
+	server.spin(500);
+}
+
+void SimpleSocketBasedController::onDisconnect(SOCKET s)
+{
+	// remove from client map
+	auto infoIter = clientMap.find(s);
+	if (infoIter == clientMap.end()) {
+		throw std::exception("Invalid state, unconnected socket disconnected from server");
+	}
+
+	if (infoIter->second != "") {
+		auto lobbyIter = lobbyMap.find(infoIter->second);
+		if (lobbyIter == lobbyMap.end()) {
+			throw std::exception("Invalid state, could not find lobby that should exist");
+		}
+		auto& clients = lobbyIter->second->clients;
+		for (auto& client : clients) {
+			clientMap.erase(client.getSocket());
+		}
+		lobbyMap.erase(lobbyIter);
+	}
+
+	clientMap.erase(infoIter);
+
+}
+
+void SimpleSocketBasedController::onClientConnected(SOCKET s)
+{
+	clientMap[s] = "";
+}
+
+void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string)
+{
+	auto iter = clientMap.find(s);
+	if (iter == clientMap.end()) {
+		throw std::exception("Client was incorrectly dropped from client map, aborting program.");
+	}
+	else {
+		if (iter->second == "") {
+			// handle not in lobby
+			// - command: help
+			// - command: new
+			// - command: join
+			// - command: start
+		}
+		else {
+			// handle in game: take turn like normal
+		}
+	}
+}
+
