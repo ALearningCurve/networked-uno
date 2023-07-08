@@ -10,7 +10,7 @@
 #include "command.h"
 #include <memory>
 #include <functional>
-#include <winsock2.h>
+#include <WinSock2.h>
 
 using VecCommand = std::function<std::shared_ptr<TextCommand>(const std::vector<std::string>&)>;
 
@@ -20,34 +20,21 @@ public:
 	virtual void startGame() = 0;
 };
 
-class SocketBasedController : public Controller {
-public:
-	virtual ~SocketBasedController() = default;
-	virtual void onDisconnect(SOCKET s) = 0;
-	virtual void onClientConnected(SOCKET s) = 0;
-	virtual void onInputRecieved(SOCKET s, std::string) = 0;
-};
-
 // For local multiplayer
 class TextController : Controller {
 	GameState& _model;
 	TextView* _view;
 	std::istream& _input;
 	bool _quit = false;
-
 	std::map<std::string, VecCommand> make_dict();
-
 	const std::map<std::string, VecCommand> _command_dict = make_dict();
-
 	const void playerDoTurn();
-
 public:
 	TextController(GameState& model, TextView* view, std::istream& istream) : _model(model), _view(view), _input(istream) {};
-
 	void startGame();
 };
 
-class SimpleSocketBasedController : public SocketBasedController {
+class SimpleSocketBasedController : public Controller, public ServerInterface {
 	struct Lobby {
 		std::string lobby_id;
 		std::vector<SocketPlayer> clients;
@@ -61,8 +48,13 @@ class SimpleSocketBasedController : public SocketBasedController {
 	// that lobby must exist in lobby map
 	std::map<SOCKET, std::string> clientMap;
 	std::map<std::string, std::unique_ptr<Lobby>> lobbyMap;
+	const static std::map<std::string, VecCommand> pregameCommands;
 	TcpServer server;
+
+	static std::map<std::string, VecCommand> make_pregame_command_dict();
 public:
+	SimpleSocketBasedController() : server(this) {}
+
 	/// <summary>
 	/// Starts the networked server
 	/// </summary>

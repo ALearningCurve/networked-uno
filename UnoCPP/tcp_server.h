@@ -11,6 +11,14 @@
 #include <set>
 #pragma comment (lib, "ws2_32.lib")
 
+class ServerInterface {
+public:
+    virtual ~ServerInterface() = default;
+    virtual void onDisconnect(SOCKET s) = 0;
+    virtual void onClientConnected(SOCKET s) = 0;
+    virtual void onInputRecieved(SOCKET s, std::string) = 0;
+};
+
 class TcpServer {
     enum STATES {
         STOPPED = 1,
@@ -20,8 +28,9 @@ class TcpServer {
 
     STATES state = STATES::STOPPED;
     std::vector<SOCKET> sockets;
-    SOCKET serverSocket;
+    SOCKET serverSocket = INVALID_SOCKET;
     fd_set activeFdSet;
+    ServerInterface* _callbackInterface = nullptr;
     int x = 0;
 
     void acceptClient() {
@@ -49,6 +58,7 @@ class TcpServer {
             << inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST)
             << " assigned SOCKET=" << socket
             << std::endl;
+        _callbackInterface->onClientConnected(socket);
     }
 
     void handleSocketRead() {
@@ -80,10 +90,7 @@ class TcpServer {
                 if (iResult > 0) {
                     std::string data(recvbuf);
                     std::cout << "[ ] Recieved data from SOCKET=" << currSocketFd << ": \"" << data << "\"" << std::endl;
-                    // TODO, DO SOMETHING WITH THE DATA
-                    this->x = this->x + 1;
-                    std::string out = "Hi from server" + std::to_string(x);
-                    sendMessage(currSocketFd, out);
+                    _callbackInterface->onInputRecieved(currSocketFd, data);
                 }
                 else if (iResult == 0) {
                     disconnectClient(currSocketFd);
@@ -96,11 +103,6 @@ class TcpServer {
                 }
             }
         }
-    }
-
-    static void sendMessage(SOCKET& s, std::string& message) {
-        std::cout << "[ ] Sending SOCKET=" << s << " the message: \"" << message << "\"" << std::endl;
-        send(s, message.c_str(), message.size() + 1, 0);
     }
 
     void disconnectClient(SOCKET s) {
@@ -117,6 +119,7 @@ class TcpServer {
             sockets.end(),
             [s](SOCKET x) { return (SOCKET)x == s; }),
             sockets.end());
+        _callbackInterface->onDisconnect(s);
     }
 
 public:
@@ -126,8 +129,16 @@ public:
         system("pause");
     }
 
+    TcpServer(ServerInterface* serverInterface): _callbackInterface(serverInterface) {
+        if (serverInterface == nullptr) {
+            throw std::invalid_argument("Must provide a pointer to a server interface");
+        }
+        FD_ZERO(&activeFdSet);
+    }
+
     void start()
     {
+        std::cout << "[ ] starting TCP Server" << std::endl;
         if (state != STOPPED) {
             throw std::exception("TcpServer is not in a stopped state");
         }
@@ -179,6 +190,11 @@ public:
             handleSocketRead();
             Sleep(waitMs);
         }
+    }
+
+    void sendClientMessage(SOCKET& s, std::string& message) {
+        std::cout << "[ ] Sending SOCKET=" << s << " the message: \"" << message << "\"" << std::endl;
+        send(s, message.c_str(), message.size() + 1, 0);
     }
 };
 

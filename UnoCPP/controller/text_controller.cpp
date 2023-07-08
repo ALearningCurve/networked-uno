@@ -102,6 +102,7 @@ const void TextController::playerDoTurn() {
 
 
 void SimpleSocketBasedController::startGame() {
+	std::cout << "[ ] Starting UNO networked server controller" << std::endl;
 	server.start();
 	server.spin(500);
 }
@@ -132,11 +133,14 @@ void SimpleSocketBasedController::onDisconnect(SOCKET s)
 
 void SimpleSocketBasedController::onClientConnected(SOCKET s)
 {
+	// enter client into a map with no lobby id ("")
 	clientMap[s] = "";
 }
 
 void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string)
 {
+	std::string fromController = "from controller";
+	server.sendClientMessage(s, fromController);
 	auto iter = clientMap.find(s);
 	if (iter == clientMap.end()) {
 		throw std::exception("Client was incorrectly dropped from client map, aborting program.");
@@ -155,3 +159,15 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string)
 	}
 }
 
+std::map<std::string, VecCommand> SimpleSocketBasedController::make_pregame_command_dict()
+{
+	std::map<std::string, VecCommand> m;
+	m["help"]  = [](auto args) { return std::make_shared<PregameHelpCommand>(args); };
+	m["new"]   = [](auto args) { return std::make_shared<PregameNewLobbyCommand>(); };
+	m["join"]  = [](auto args) { return std::make_shared<PregameJoinLobbyCommand>(); };
+	m["start"] = [](auto args) { return std::make_shared<PregameHelpCommand>(); };
+
+	return m;
+}
+
+const std::map<std::string, VecCommand> SimpleSocketBasedController::pregameCommands = SimpleSocketBasedController::make_pregame_command_dict();
