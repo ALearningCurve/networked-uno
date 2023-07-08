@@ -10,6 +10,7 @@
 #include "command.h"
 #include <memory>
 #include <functional>
+#include <winsock2.h>
 
 using VecCommand = std::function<std::shared_ptr<TextCommand>(const std::vector<std::string>&)>;
 
@@ -22,9 +23,9 @@ public:
 class SocketBasedController : public Controller {
 public:
 	virtual ~SocketBasedController() = default;
-	virtual void onDisconnect(SOCKET s);
-	virtual void onClientConnected(SOCKET s);
-	virtual void onInputRecieved(SOCKET s, std::string);
+	virtual void onDisconnect(SOCKET s) = 0;
+	virtual void onClientConnected(SOCKET s) = 0;
+	virtual void onInputRecieved(SOCKET s, std::string) = 0;
 };
 
 // For local multiplayer

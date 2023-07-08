@@ -12,7 +12,7 @@
 #pragma comment (lib, "ws2_32.lib")
 
 class TcpServer {
-    static enum STATES {
+    enum STATES {
         STOPPED = 1,
         ACTIVE,
         STOPPING
@@ -31,13 +31,13 @@ class TcpServer {
         if (socket == INVALID_SOCKET)
         {
             if (WSAGetLastError() != WSAEWOULDBLOCK) {
-                std::cout << "accept() failed with error " << WSAGetLastError() << std::endl;
+                std::cout << "[X] accept() failed with error " << WSAGetLastError() << std::endl;
                 return;
             }
         }
         u_long nonBlock = 1;
         if (ioctlsocket(socket, FIONBIO, &nonBlock) == SOCKET_ERROR) {
-            std::cout << "ioctlsocket(FIONBIO) failed with error " << WSAGetLastError();
+            std::cout << "[X] ioctlsocket(FIONBIO) failed with error " << WSAGetLastError();
         }
 
         char host[NI_MAXHOST];
@@ -45,9 +45,9 @@ class TcpServer {
         FD_SET(socket, &activeFdSet);
         sockets.push_back(socket);
         std::cout
-            << "Client connected from "
+            << "[ ] Client connected from "
             << inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST)
-            << " assigned socket=" << socket
+            << " assigned SOCKET=" << socket
             << std::endl;
     }
 
@@ -78,6 +78,8 @@ class TcpServer {
                 ZeroMemory(recvbuf, recvbuflen);
                 iResult = recv(currSocketFd, recvbuf, recvbuflen, 0);
                 if (iResult > 0) {
+                    std::string data(recvbuf);
+                    std::cout << "[ ] Recieved data from SOCKET=" << currSocketFd << ": \"" << data << "\"" << std::endl;
                     // TODO, DO SOMETHING WITH THE DATA
                     this->x = this->x + 1;
                     std::string out = "Hi from server" + std::to_string(x);
@@ -88,7 +90,7 @@ class TcpServer {
                     i--;
                 }
                 else {
-                    printf("recv failed: %d\n", WSAGetLastError());
+                    std::cout << "[X] recv failed for SOCKET=" << currSocketFd << ": " << WSAGetLastError() << std::endl;
                     disconnectClient(currSocketFd);
                     i--;
                 }
@@ -97,11 +99,12 @@ class TcpServer {
     }
 
     static void sendMessage(SOCKET& s, std::string& message) {
+        std::cout << "[ ] Sending SOCKET=" << s << " the message: \"" << message << "\"" << std::endl;
         send(s, message.c_str(), message.size() + 1, 0);
     }
 
     void disconnectClient(SOCKET s) {
-        std::cout << "Disconnecting client with socket=" << s << std::endl;
+        std::cout << "[ ] Disconnecting client with SOCKET=" << s << std::endl;
         // if you reach this point, connection needs to be shutdown 
         if (shutdown(s, SD_SEND) == SOCKET_ERROR) {
             std::cout << "" << std::endl;
