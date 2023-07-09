@@ -24,7 +24,7 @@ std::string TextView::stringify_game_start_for_player(GameState& game, Player* p
 {
 	std::stringstream ss;
 	ss << "Current Game State:"; 
-	ss << "\n\tIts " << player->get_name() << "'s turn";
+	ss << "\n\tIts " << game.get_current_player()->get_name() << "'s turn";
 	ss << "\n\tLast played card: ";
 	ss << "" << stringify_card(*game.get_last_card());
 	ss << "\n\tYour hand: ";

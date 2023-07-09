@@ -137,7 +137,7 @@ public:
 
     void start()
     {
-        std::cout << "[ ] starting TCP Server" << std::endl;
+        std::cout << "[ ] Starting TCP Server" << std::endl;
         if (state != STOPPED) {
             throw std::exception("TcpServer is not in a stopped state");
         }
@@ -175,6 +175,7 @@ public:
         FD_ZERO(&_active_fd_set);
         FD_SET(server_socket, &_active_fd_set);
         state = ACTIVE;
+        std::cout << "[ ] Started TCP Server on 0.0.0.0:1337" << std::endl;
     }
 
     STATES get_state() const {

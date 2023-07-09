@@ -19,9 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="controller\command.cpp" />
     <ClCompile Include="controller\controller.cpp" />
-    <ClCompile Include="controller\tcp_server.cpp" />
     <ClCompile Include="helpers\stringutils.cpp" />
     <ClCompile Include="models\card.cpp" />
     <ClCompile Include="models\deck.cpp" />
