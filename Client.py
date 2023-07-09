@@ -1,7 +1,6 @@
 
 import socket
 import asyncio
-import select
 from concurrent.futures import ThreadPoolExecutor
 
 HOST = "127.0.0.1"  # The server's hostname or IP address
@@ -21,7 +20,6 @@ async def nonBlockingInput():
 async def createUserInputHandler(s):
     loop = asyncio.get_running_loop()
     while isRunning:
-        #close server with asynco inputs
         userInput = await nonBlockingInput()
         if not isRunning:
             return
@@ -50,7 +48,7 @@ async def main():
         print(f"[ ] Connected to server on {HOST}:{PORT}")
         print(f"[ ] type \"q\" to quit the program")
 
-        inputTask = asyncio.create_task(createUserInputHandler(s))
+        asyncio.create_task(createUserInputHandler(s))
         await createServerResponseHandler(s)
         s.shutdown(2)
 
