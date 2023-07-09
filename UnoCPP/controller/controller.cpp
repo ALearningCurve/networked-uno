@@ -70,7 +70,7 @@ void SimpleSocketBasedController::startGame() {
 	server.spin(500);
 }
 
-void SimpleSocketBasedController::onDisconnect(SOCKET s)
+void SimpleSocketBasedController::on_disconnect(SOCKET s)
 {
 	// remove from client map
 	auto optLobbyId = lobbyManager.get_client_lobby_id(s);
@@ -89,7 +89,7 @@ void SimpleSocketBasedController::onDisconnect(SOCKET s)
 	lobbyManager.remove_client(s);
 }
 
-void SimpleSocketBasedController::onClientConnected(SOCKET s)
+void SimpleSocketBasedController::on_client_connected(SOCKET s)
 {
 	lobbyManager.add_client(s);
 	std::vector<SOCKET> vec = { s };
@@ -97,7 +97,7 @@ void SimpleSocketBasedController::onClientConnected(SOCKET s)
 	view.alert("Welcome to the uno game server! You are in the lobby selection stage of the server. Type \"help\" for help.");
 }
 
-void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
+void SimpleSocketBasedController::on_input_recieved(SOCKET s, std::string uinput)
 {
 	auto clientLobbyId = lobbyManager.get_client_lobby_id(s);
 	std::vector<SOCKET> requesterVec = { s };

@@ -3,7 +3,7 @@
 #include "../models/player.h"
 #include "../models/card.h"
 #include "../view/text_view.h"
-#include "../tcp_server.h"
+#include "../controller/tcp_server.h"
 #include <iostream>
 #include <istream>
 #include <map>
@@ -60,13 +60,13 @@ public:
 	/// If client disconnects and is in a lobby, it will end that lobby.
 	/// </summary>
 	/// <param name="s">socket of the disconnected client</param>
-	void onDisconnect(SOCKET s);
+	void on_disconnect(SOCKET s);
 
 	/// <summary>
 	/// handles the event of a client connecting to the server
 	/// </summary>
 	/// <param name="s">socket of the conntected client</param>
-	void onClientConnected(SOCKET s);
+	void on_client_connected(SOCKET s);
 
 	/// <summary>
 	/// handles the event of a client sending data to the server.
@@ -76,7 +76,7 @@ public:
 	/// </summary>
 	/// <param name="s">socket of the sending client</param>
 	/// <param name="">data the client sent as a string</param>
-	void onInputRecieved(SOCKET s, std::string data);
+	void on_input_recieved(SOCKET s, std::string data);
 };
 
 namespace CommandUtils {

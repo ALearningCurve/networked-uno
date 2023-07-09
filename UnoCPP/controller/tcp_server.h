@@ -14,9 +14,9 @@
 class ServerInterface {
 public:
     virtual ~ServerInterface() = default;
-    virtual void onDisconnect(SOCKET s) = 0;
-    virtual void onClientConnected(SOCKET s) = 0;
-    virtual void onInputRecieved(SOCKET s, std::string) = 0;
+    virtual void on_disconnect(SOCKET s) = 0;
+    virtual void on_client_connected(SOCKET s) = 0;
+    virtual void on_input_recieved(SOCKET s, std::string) = 0;
 };
 
 class TcpServer {
@@ -28,15 +28,14 @@ class TcpServer {
 
     STATES state = STATES::STOPPED;
     std::vector<SOCKET> sockets;
-    SOCKET serverSocket = INVALID_SOCKET;
-    fd_set activeFdSet;
-    ServerInterface* _callbackInterface = nullptr;
-    int x = 0;
+    SOCKET server_socket = INVALID_SOCKET;
+    fd_set _active_fd_set;
+    ServerInterface* _server_interface = nullptr;
 
-    void acceptClient() {
+    void accept_client() {
         sockaddr_in client;
         int clientSize = sizeof(client);
-        SOCKET socket = accept(serverSocket, (sockaddr*)&client, &clientSize);
+        SOCKET socket = accept(server_socket, (sockaddr*)&client, &clientSize);
         if (socket == INVALID_SOCKET)
         {
             if (WSAGetLastError() != WSAEWOULDBLOCK) {
@@ -51,24 +50,24 @@ class TcpServer {
 
         char host[NI_MAXHOST];
         ZeroMemory(host, NI_MAXHOST);
-        FD_SET(socket, &activeFdSet);
+        FD_SET(socket, &_active_fd_set);
         sockets.push_back(socket);
         std::cout
             << "[ ] Client connected from "
             << inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST)
             << " assigned SOCKET=" << socket
             << std::endl;
-        _callbackInterface->onClientConnected(socket);
+        _server_interface->on_client_connected(socket);
     }
 
-    void handleSocketRead() {
+    void handle_socket_read() {
         char recvbuf[4096];
         int recvbuflen = 4096;
         int iResult;
         struct timeval tv;
         tv.tv_usec = 50;
         tv.tv_sec = 0;
-        fd_set readFdSet = activeFdSet;
+        fd_set readFdSet = _active_fd_set;
         iResult = select(FD_SETSIZE, &readFdSet, NULL, NULL, &tv);
         if (iResult == SOCKET_ERROR) {
             throw std::exception("Error retrieving data from sockets!");
@@ -81,8 +80,8 @@ class TcpServer {
             if (!FD_ISSET(currSocketFd, &readFdSet)) {
                 continue;
             }
-            if (currSocketFd == serverSocket) {
-                acceptClient();
+            if (currSocketFd == server_socket) {
+                accept_client();
             }
             else {
                 ZeroMemory(recvbuf, recvbuflen);
@@ -90,36 +89,36 @@ class TcpServer {
                 if (iResult > 0) {
                     std::string data(recvbuf);
                     std::cout << "[ ] Recieved data from SOCKET=" << currSocketFd << ": \"" << data << "\"" << std::endl;
-                    _callbackInterface->onInputRecieved(currSocketFd, data);
+                    _server_interface->on_input_recieved(currSocketFd, data);
                 }
                 else if (iResult == 0) {
-                    disconnectClient(currSocketFd);
+                    disconnect_client(currSocketFd);
                     i--;
                 }
                 else {
                     std::cout << "[X] recv failed for SOCKET=" << currSocketFd << ": " << WSAGetLastError() << std::endl;
-                    disconnectClient(currSocketFd);
+                    disconnect_client(currSocketFd);
                     i--;
                 }
             }
         }
     }
 
-    void disconnectClient(SOCKET s) {
+    void disconnect_client(SOCKET s) {
         std::cout << "[ ] Disconnecting client with SOCKET=" << s << std::endl;
         // if you reach this point, connection needs to be shutdown 
         if (shutdown(s, SD_SEND) == SOCKET_ERROR) {
             std::cout << "" << std::endl;
         }
         closesocket(s);
-        FD_CLR(s, &activeFdSet);
+        FD_CLR(s, &_active_fd_set);
 
         // remove from sockets array
         sockets.erase(std::remove_if(sockets.begin(),
             sockets.end(),
             [s](SOCKET x) { return (SOCKET)x == s; }),
             sockets.end());
-        _callbackInterface->onDisconnect(s);
+        _server_interface->on_disconnect(s);
     }
 
 public:
@@ -129,11 +128,11 @@ public:
         system("pause");
     }
 
-    TcpServer(ServerInterface* serverInterface): _callbackInterface(serverInterface) {
+    TcpServer(ServerInterface* serverInterface): _server_interface(serverInterface) {
         if (serverInterface == nullptr) {
             throw std::invalid_argument("Must provide a pointer to a server interface");
         }
-        FD_ZERO(&activeFdSet);
+        FD_ZERO(&_active_fd_set);
     }
 
     void start()
@@ -153,14 +152,14 @@ public:
         }
 
         // Create a socket
-        serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-        if (serverSocket == INVALID_SOCKET)
+        server_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (server_socket == INVALID_SOCKET)
         {
             WSACleanup();
             throw std::exception("Can't create a socket");
         }
         u_long nonBlock = 1;
-        if (ioctlsocket(serverSocket, FIONBIO, &nonBlock) == SOCKET_ERROR) {
+        if (ioctlsocket(server_socket, FIONBIO, &nonBlock) == SOCKET_ERROR) {
             printf("ioctlsocket(FIONBIO) failed with error %d\n", WSAGetLastError());
         }
 
@@ -169,16 +168,16 @@ public:
         hint.sin_port = htons(1337);
         hint.sin_addr.S_un.S_addr = INADDR_ANY;
 
-        bind(serverSocket, (sockaddr*)&hint, sizeof(hint));
-        listen(serverSocket, SOMAXCONN);
-        sockets.push_back(serverSocket);
+        bind(server_socket, (sockaddr*)&hint, sizeof(hint));
+        listen(server_socket, SOMAXCONN);
+        sockets.push_back(server_socket);
 
-        FD_ZERO(&activeFdSet);
-        FD_SET(serverSocket, &activeFdSet);
+        FD_ZERO(&_active_fd_set);
+        FD_SET(server_socket, &_active_fd_set);
         state = ACTIVE;
     }
 
-    STATES getState() const {
+    STATES get_state() const {
         return this->state;
     }
 
@@ -187,12 +186,12 @@ public:
             throw std::exception("TCP Server state must be active to spin");
         }
         while (state == ACTIVE) {
-            handleSocketRead();
+            handle_socket_read();
             Sleep(waitMs);
         }
     }
 
-    void sendClientMessage(SOCKET& s, const std::string& message) {
+    void send_client_message(SOCKET& s, const std::string& message) {
         std::cout << "[ ] Sending SOCKET=" << s << " the message: \"" << message << "\"" << std::endl;
         send(s, message.c_str(), message.size() + 1, 0);
     }

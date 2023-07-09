@@ -4,7 +4,7 @@
 #include <vector>
 #include "../models/game_state.h"
 #include "../models/lobby_manager.h"
-#include "../tcp_server.h"
+#include "../controller/tcp_server.h"
 
 
 class TextView {

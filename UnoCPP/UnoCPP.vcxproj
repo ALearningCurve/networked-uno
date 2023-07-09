@@ -35,6 +35,7 @@
   <ItemGroup>
     <ClInclude Include="controller\command.h" />
     <ClInclude Include="controller\controller.h" />
+    <ClInclude Include="controller\tcp_server.h" />
     <ClInclude Include="exceptions\exception.h" />
     <ClInclude Include="helpers\stringutils.h" />
     <ClInclude Include="models\card.h" />
@@ -44,7 +45,6 @@
     <ClInclude Include="models\lobby_manager.h" />
     <ClInclude Include="models\models.h" />
     <ClInclude Include="models\player.h" />
-    <ClInclude Include="tcp_server.h" />
     <ClInclude Include="UnoCPP.h" />
     <ClInclude Include="view\text_view.h" />
   </ItemGroup>
