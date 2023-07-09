@@ -113,7 +113,7 @@ const std::shared_ptr<Card> GameState::draw_for_player(Player* player)
 	return card;
 }
 
-const void GameState::play_for_player(Player* player, const int& cardPos, std::optional<std::string> optWildColor)
+const Card& GameState::play_for_player(Player* player, const int& cardPos, std::optional<std::string> optWildColor)
 {
 	std::optional<std::string> can_play_res = can_play(player, cardPos, optWildColor);
 	if (can_play_res) {
@@ -133,7 +133,7 @@ const void GameState::play_for_player(Player* player, const int& cardPos, std::o
 	if (_last_card->is_wild()) {
 		_last_card = std::make_shared<Card>(_last_card->type(), *optWildColor);
 	}
-	return void();
+	return *_last_card;
 }
 
 const std::optional<std::string> GameState::can_play(Player* player, const int& cardPos, std::optional<std::string> optWildColor) {

@@ -21,6 +21,15 @@ public:
 			throw std::exception("Max Players must between 2 and 4");
 		}
 	}
+
+	Player* getPlayerObject(SOCKET s) {
+		for (auto& client : _clients) {
+			if (client->getSocket() == s) {
+				return client.get();
+			}
+		}
+		throw std::exception("Could not find a player object in the lobby with the given SOCKET");
+	}
 };
 
 class LobbyManager

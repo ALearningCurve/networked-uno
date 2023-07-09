@@ -41,7 +41,7 @@ public:
 class UnoGameTextCommand {
 public:
     virtual ~UnoGameTextCommand() = default;
-    virtual void run(GameState &state, TextView* view) = 0;
+    virtual void run(GameState &state, TextView* userView, TextView* wholeGameView, Player* player) = 0;
     virtual std::string get_name() const = 0;
     virtual bool takes_whole_turn() const = 0;
 };
@@ -54,8 +54,8 @@ public:
         return "help";
     }
 
-    void run(GameState& state, TextView* view) {
-        view->info(
+    void run(GameState& state, TextView* userView, TextView* wholeGameView, Player* player) {
+        userView->info(
             "Help Menu: \n"
             "  h:           show help menu\n"
             "  draw:        draw a card from the deck\n"
@@ -82,9 +82,10 @@ public:
         return "Draw";
      }
 
-     void run(GameState& state, TextView* view) {
-         std::shared_ptr<Card> card = state.draw_for_player(state.get_current_player());
-         view->info("Drew a " + view->stringify_card(*card));
+     void run(GameState& state, TextView* userView, TextView* wholeGameView, Player* player) {
+         std::shared_ptr<Card> card = state.draw_for_player(player);
+         userView->info("Drew a " + userView->stringify_card(*card));
+         wholeGameView->info(player->get_name() + " just drew a card");
      }
 
      bool takes_whole_turn() const {
@@ -102,13 +103,13 @@ public:
         return "Play";
     }
 
-    void run(GameState& state, TextView* view) {
-        auto canPlay = state.can_play(state.get_current_player(), _cardNum, _wildColorChoice);
+    void run(GameState& state, TextView* userView, TextView* wholeGameView, Player* player) {
+        auto canPlay = state.can_play(player, _cardNum, _wildColorChoice);
         if (canPlay != std::nullopt) {
             throw std::invalid_argument("Cannot play that card: " + *canPlay);
         }
-
-        state.play_for_player(state.get_current_player(), _cardNum, _wildColorChoice);
+        const auto& card = state.play_for_player(player, _cardNum, _wildColorChoice);
+        wholeGameView->info(player->get_name() + " just played a " + wholeGameView->stringify_card(card));
     }
 
     bool takes_whole_turn() const {
@@ -122,8 +123,14 @@ public:
         return "Uno";
     }
 
-    void run(GameState& state, TextView* view) {
-        state.player_said_uno(state.get_current_player());
+    void run(GameState& state, TextView* userView, TextView* wholeGameView, Player* player) {
+        try {
+            state.player_said_uno(player);
+        }
+        catch (std::exception_ptr ex) {
+            std::rethrow_exception(ex);
+        }
+        wholeGameView->alert(player->get_name() + " successfully called \"uno\"! They are now uno immune and/or some players got caught not saying uno!");
     }
 
     bool takes_whole_turn() const {
@@ -141,13 +148,13 @@ public:
         return "Play then Uno";
     }
 
-    void run(GameState& state, TextView* view) {
+    void run(GameState& state, TextView* userView, TextView* wholeGameView, Player* player) {
         // make sure this command can be run (player must have only 1 card)
         if (state.get_current_player()->get_hand().get_number_cards() != 2) {
             throw std::invalid_argument("Can only use this command when you have 2 cards in your hand!");
         }
-        _play.run(state, view);
-        _uno.run(state, view);
+        _play.run(state, userView, wholeGameView, player);
+        _uno.run(state, userView, wholeGameView, player);
     }
 
     bool takes_whole_turn() const {

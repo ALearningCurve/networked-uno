@@ -29,23 +29,25 @@ class TextController : Controller {
 	TextView* _view;
 	std::istream& _input;
 	bool _quit = false;
-	std::map<std::string, UnoGameCommandFactory> make_dict();
-	const std::map<std::string, UnoGameCommandFactory> _command_dict = make_dict();
+	const static std::map<std::string, UnoGameCommandFactory> _command_dict;
 	const void playerDoTurn();
 public:
 	TextController(GameState& model, TextView* view, std::istream& istream) : _model(model), _view(view), _input(istream) {};
+	static std::map<std::string, UnoGameCommandFactory> make_uno_game_commands();
 	void startGame();
 };
 
 class SimpleSocketBasedController : public Controller, public ServerInterface {
 	// invariant: if ClientInformation in client map has lobby_id, then
 	// that lobby must exist in lobby map
-	const static std::map<std::string, LobbyCommandFactory> pregameCommands;
 	LobbyManager lobbyManager;
 	TcpServer server;
 
-	static std::map<std::string, LobbyCommandFactory> make_pregame_command_dict();
+	const static std::map<std::string, LobbyCommandFactory> _lobby_command_dict;
+	const static std::map<std::string, UnoGameCommandFactory> _uno_game_command_dict;
+
 public:
+	static std::map<std::string, LobbyCommandFactory> make_lobby_command_dict();
 	SimpleSocketBasedController() : server(this) {}
 
 	/// <summary>
@@ -77,19 +79,9 @@ public:
 	void onInputRecieved(SOCKET s, std::string data);
 };
 
-template <typename T>
-std::optional<std::pair<T, std::vector<std::string>>> getCommandFromMap(std::map<std::string, T> commands, TextView* view, std::string& uinput)
-{
-	std::string command_name = lsplit_str(uinput);
-	const auto& commandEntry = commands.find(command_name);
+namespace CommandUtils {
+	template <typename T>
+	std::optional<std::pair<T, std::vector<std::string>>> getCommandFromMap(std::map<std::string, T> commands, TextView* view, std::string& uinput);
 
-	if (commandEntry == commands.end()) {
-		view->error("Unknown Command: '" + command_name + "'");
-		return std::nullopt;
-	}
-	std::vector<std::string> vec;
-	split_str(uinput, " ", vec);
-	vec.erase(vec.begin()); // get rid of the first input (which is the command name
-	std::shared_ptr<UnoGameTextCommand> command;
-	return std::optional{ std::make_pair(commandEntry->second, vec) };
-}
+	std::optional<std::shared_ptr<UnoGameTextCommand>> getAndRunUnoGameCommand(const std::map<std::string, UnoGameCommandFactory>& commands, std::string& uinput, TextView* userView, TextView* wholeGameView, GameState& game, Player* user);
+};

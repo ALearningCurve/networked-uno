@@ -23,7 +23,7 @@ void TextController::startGame() {
 	_view->alert("Thanks for playing, quitting game!");
 }
 
-std::map<std::string, UnoGameCommandFactory> TextController::make_dict()
+std::map<std::string, UnoGameCommandFactory> TextController::make_uno_game_commands()
 {
 	std::map<std::string, UnoGameCommandFactory> m;
 	m["play"]		= [](auto args) { return std::make_shared<PlayCommand>(args); };
@@ -34,6 +34,7 @@ std::map<std::string, UnoGameCommandFactory> TextController::make_dict()
 
 	return m;
 }
+const std::map<std::string, UnoGameCommandFactory> TextController::_command_dict = TextController::make_uno_game_commands();
 
 const void TextController::playerDoTurn() {
 	while (true) {
@@ -54,28 +55,10 @@ const void TextController::playerDoTurn() {
 			return;
 		}
 	
-		auto maybeCommand = getCommandFromMap<UnoGameCommandFactory>(_command_dict, _view, uinput);
-		if (!maybeCommand.has_value()) {
-			continue;
-		} else {
-			auto [commandFactory, argsVec] = maybeCommand.value();
-			auto command = commandFactory(argsVec);
-			try {
-				command ->run(this->_model, this->_view);
-			}
-			catch (const std::exception& ex) {
-				_view->error(std::string("ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
-				// if there was an error, let the player have the chance to retry
-				continue;
-			}
-			catch (...) {
-				_view->error("UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
-				std::rethrow_exception(std::current_exception());
-			}
+		auto optCommand = CommandUtils::getAndRunUnoGameCommand(_command_dict, uinput, _view, _view, _model, _model.get_current_player());
 
-			if (command->takes_whole_turn()) {
-				return;
-			}
+		if (optCommand.has_value() && optCommand.value()->takes_whole_turn()) {
+			return;
 		}
 	}
 }
@@ -117,14 +100,13 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 {
 	auto clientLobbyId = lobbyManager.getClientLobbyId(s);
 	std::vector<SOCKET> requesterVec = { s };
-	std::vector<SOCKET> lobbySocketVec;
 	SocketView requesterView(requesterVec, server);
 	// because the lobby of the client can change during command execution, 
 	// we must use a dynamic lobby view
 	DynamicClientLobbyView lobbyView(lobbyManager, server, s);
 
 	if (!clientLobbyId.has_value()) {
-		auto maybeCommand = getCommandFromMap<LobbyCommandFactory>(pregameCommands, &requesterView, uinput);
+		auto maybeCommand = CommandUtils::getCommandFromMap<LobbyCommandFactory>(_lobby_command_dict, &requesterView, uinput);
 		if (!maybeCommand.has_value()) {
 			return requesterView.error("Enter a valid command name next time!");
 		}
@@ -160,9 +142,16 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 		if (!lobby._started) {
 			return requesterView.error("Lobby has not yet started, your command was not evaluated. Sit tight until others join!");
 		}
-		// insert sockets of all clients in lobby into lobby view object via updating the lobbySocketVec reference
-		std::transform(lobby._clients.begin(), lobby._clients.end(), std::back_inserter(lobbySocketVec), [](std::unique_ptr<SocketPlayer>& client) { return client->getSocket(); });
-		// now we know that the game has started, so proceed to evaluate user input
+
+		if (lobby._game->get_winner() != nullptr) {
+			// in theory this if is not possible if our code executes as we expect (since if a command errors 
+			// then it should not modify the game state). Yet if there is some bug, where the game ends after
+			// a command errors, add a check here to prevent undefined behavior with the game.
+			lobbyView.alert("Game has ended, disconnect from the server to play another game!");
+			lobbyManager.removeLobby(lobby._lobbyId);
+		}
+
+		auto optCommand = CommandUtils::getAndRunUnoGameCommand(_uno_game_command_dict, uinput, &requesterView, &lobbyView, *lobby._game, lobby.getPlayerObject(s));
 
 		// check if the game has ended
 		const Player* winner;
@@ -173,7 +162,7 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 	}
 }
 
-std::map<std::string, LobbyCommandFactory> SimpleSocketBasedController::make_pregame_command_dict()
+std::map<std::string, LobbyCommandFactory> SimpleSocketBasedController::make_lobby_command_dict()
 {
 	std::map<std::string, LobbyCommandFactory> m;
 	m["help"]  = [](auto args) { return std::make_shared<LobbyHelpCommand>(args); };
@@ -183,4 +172,59 @@ std::map<std::string, LobbyCommandFactory> SimpleSocketBasedController::make_pre
 	return m;
 }
 
-const std::map<std::string, LobbyCommandFactory> SimpleSocketBasedController::pregameCommands = SimpleSocketBasedController::make_pregame_command_dict();
+const std::map<std::string, LobbyCommandFactory> SimpleSocketBasedController::_lobby_command_dict = SimpleSocketBasedController::make_lobby_command_dict();
+const std::map<std::string, UnoGameCommandFactory> SimpleSocketBasedController::_uno_game_command_dict = TextController::make_uno_game_commands();
+
+
+template <typename T>
+std::optional<std::pair<T, std::vector<std::string>>> CommandUtils::getCommandFromMap(std::map<std::string, T> commands, TextView* view, std::string& uinput)
+{
+	std::string command_name = lsplit_str(uinput);
+	const auto& commandEntry = commands.find(command_name);
+
+	if (commandEntry == commands.end()) {
+		view->error("Unknown Command: '" + command_name + "'");
+		return std::nullopt;
+	}
+	std::vector<std::string> vec;
+	split_str(uinput, " ", vec);
+	vec.erase(vec.begin()); // get rid of the first input (which is the command name
+	std::shared_ptr<UnoGameTextCommand> command;
+	return std::optional{ std::make_pair(commandEntry->second, vec) };
+}
+
+std::optional<std::shared_ptr<UnoGameTextCommand>> CommandUtils::getAndRunUnoGameCommand(const std::map<std::string, UnoGameCommandFactory>& commands, std::string& uinput, TextView* userView, TextView* wholeGameView, GameState& game, Player* user) {
+	auto maybeCommand = getCommandFromMap<UnoGameCommandFactory>(commands, userView, uinput);
+	std::optional<std::shared_ptr<UnoGameTextCommand>> command = std::nullopt;
+	if (!maybeCommand.has_value()) {
+		return std::nullopt;
+	}
+	else {
+		auto [commandFactory, argsVec] = maybeCommand.value();
+		try {
+			command = commandFactory(argsVec);
+		}
+		catch (const std::exception& ex) {
+			userView->error(std::string("BAD INPUT: ") + ex.what());
+			return std::nullopt;
+		}
+		catch (...) {
+			userView->error("BAD INPUT: failed to create command with given parameters");
+			return std::nullopt;
+		}
+		try {
+			command.value()->run(game, userView, wholeGameView, user);
+		}
+		catch (const std::exception& ex) {
+			userView->error(std::string("ERROR EXECUTING COMMAND " + command.value()->get_name() + ": ") + ex.what());
+			// if there was an error, let the player have the chance to retry
+			return std::nullopt;
+		}
+		catch (...) {
+			userView->error("UNHANDLDED ERROR EXECUTING COMMAND " + command.value()->get_name());
+			std::rethrow_exception(std::current_exception());
+			return std::nullopt;
+		}
+	}
+	return command;
+}
