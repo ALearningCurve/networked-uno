@@ -4,14 +4,15 @@
 #include "../helpers/stringutils.h"
 #include "../LobbyManager.h"
 
-namespace VecValidator {
-    const std::string& getAndEnsureIndex(const std::vector<std::string>& vec, const int& index) {
+class VecValidator {
+public:
+    static const std::string& getAndEnsureIndex(const std::vector<std::string>& vec, const int& index) {
         if (vec.size() <= index) {
             throw std::invalid_argument("missing argument #" + std::to_string(index + 1));
         }
         return vec.at(index);
     }
-    int getInt(const std::vector<std::string>& vec, const int& index) {
+    static int getInt(const std::vector<std::string>& vec, const int& index) {
         const std::string& str = VecValidator::getAndEnsureIndex(vec, index);
         try {
             return std::stoi(str);
@@ -24,17 +25,17 @@ namespace VecValidator {
         }
     }
 
-    const std::string& getString(const std::vector<std::string>& vec, const int& index) {
+    static const std::string& getString(const std::vector<std::string>& vec, const int& index) {
         return VecValidator::getAndEnsureIndex(vec, index);
     }
 
-    const std::optional<std::string> getStringOptional(const std::vector<std::string>& vec, const int& index) {
+    static const std::optional<std::string> getStringOptional(const std::vector<std::string>& vec, const int& index) {
         if (vec.size() > index) {
             return getAndEnsureIndex(vec, index);
         }
         return {};
     }
-}
+};
 
 // Base class for commands that modify the game state
 class UnoGameTextCommand {
@@ -161,33 +162,80 @@ public:
     virtual std::string get_name() const = 0;
 };
 
-//m["help"] = [](auto args) { return std::make_shared<LobbyHelpCommand>(args); };
 //m["new"] = [](auto args) { return std::make_shared<NewLobbyCommand>(); };
 //m["join"] = [](auto args) { return std::make_shared<JoinLobbyCommand>(); };
-//m["start"] = [](auto args) { return std::make_shared<StartLobbyCommand>(); };
 
 class LobbyHelpCommand : public LobbyTextCommand {
 public:
-public:
-    LobbyHelpCommand() {}
+    LobbyHelpCommand(const std::vector<std::string>& args) {}
 
     std::string get_name() const {
         return "lobby help";
     }
 
-    void run(GameState& state, TextView* view) {
+    void run(SOCKET requester, LobbyManager& state, TextView* view) {
         view->info(
             "Help Menu: \n"
             "  help:        show help menu\n"
-            "  new:         create a new lobby. Takes the following arguments:\n"
+            "  new:         create a new lobby and joins you into that lobby. Takes the following arguments:\n"
             "                   - lobbyId: string (between 1 and 15 characters (no whitepace))\n"   
-            "                   - players: number (betwewn 1 and 4). Automatically starts game once this number of players join the lobby\n"                  
+            "                   - name: (between 1 and 15 characters (no whitespace)) string of your player's name in the lobby. \n"          
+            "                   - players: number (betwewn 1 and 4). Automatically starts game once this number of players join the lobby\n" 
             "  join:        joins a lobby. Takes following arguments: \n"
-            "                   - lobbyId: string of the lobby to join (between 1 and 15 charactes)\n"        
+            "                   - lobbyId: string of the lobby to join (between 1 and 15 charactes)\n" 
+            "                   - name: (between 1 and 15 characters (no whitespace)) string of your player's name in the lobby. \n"
         );
+    }
+};
+
+class JoinLobbyCommand : public LobbyTextCommand {
+    std::string lobbyId;
+    std::string creatorName;
+public:
+    JoinLobbyCommand(const std::vector<std::string>& args) : lobbyId(VecValidator::getString(args, 0)), creatorName(VecValidator::getString(args, 1)) {
+        if (creatorName.size() < 1 || creatorName.size() > 15) {
+            throw std::exception("Player name must be between 1 and 15 characters");
+        }
+    }
+
+    std::string get_name() const {
+        return "lobby help";
+    }
+
+    void run(SOCKET requester, LobbyManager& state, TextView* view) {
+        std::unique_ptr player = std::make_unique<SocketPlayer>(creatorName, requester);
+        state.addPlayerToLobby(lobbyId, std::move(player));
+        view->info("Successfully joined lobby");
     }
 
     bool takes_whole_turn() const {
         return false;
     }
 };
+
+class NewLobbyCommand : public LobbyTextCommand {
+    std::string lobbyId;
+    std::string creatorName;
+    int numPlayers;
+    JoinLobbyCommand joinCommand;
+public:
+    NewLobbyCommand(const std::vector<std::string>& args) : 
+        lobbyId(VecValidator::getString(args, 0)), 
+        creatorName(VecValidator::getString(args, 1)), 
+        numPlayers(VecValidator::getInt(args, 2)),
+        joinCommand(args)
+    {}
+
+    std::string get_name() const {
+        return "new lobby";
+    }
+
+    void run(SOCKET requester, LobbyManager& state, TextView* view) {
+        state.createLobby(lobbyId, requester, numPlayers);
+        view->info("Created lobby \"" + lobbyId + "\"");
+        joinCommand.run(requester, state, view);
+    }
+};
+
+
+

@@ -20,7 +20,7 @@ class GameState {
 	GameState();
 	std::shared_ptr<Card> draw_card();
 public:
-	GameState(Deck& deck, std::vector<Player*> players);
+	GameState(Deck deck, std::vector<Player*> players);
 	Player* get_current_player();
 	const std::vector<Player*>& get_players();
 	void start_next_turn();

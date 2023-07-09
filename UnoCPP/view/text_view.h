@@ -32,5 +32,6 @@ class SocketView : public TextView {
 	TcpServer& _server;
 	void output_message(const std::string& msg);
 public:
-	SocketView(std::vector<SOCKET> sockets, TcpServer& server) : _sockets(sockets), _server(server) {};
+	SocketView(std::vector<SOCKET>& sockets, TcpServer& server) : _sockets(sockets), _server(server) {
+	};
 };

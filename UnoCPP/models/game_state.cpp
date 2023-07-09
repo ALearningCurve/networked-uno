@@ -11,7 +11,7 @@ std::shared_ptr<Card> GameState::draw_card()
 	return _draw_deck.draw_card();
 }
 
-GameState::GameState(Deck& deck, std::vector<Player*> players): _draw_deck(deck), _players(players)
+GameState::GameState(Deck deck, std::vector<Player*> players): _draw_deck(deck), _players(players)
 {
 	if (deck.get_card_count() < 1) {
 		throw std::invalid_argument("must be at least one card in the deck to start with");

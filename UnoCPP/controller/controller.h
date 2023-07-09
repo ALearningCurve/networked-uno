@@ -40,7 +40,6 @@ public:
 class SimpleSocketBasedController : public Controller, public ServerInterface {
 	// invariant: if ClientInformation in client map has lobby_id, then
 	// that lobby must exist in lobby map
-	std::map<SOCKET, std::string> clientMap;
 	const static std::map<std::string, LobbyCommandFactory> pregameCommands;
 	LobbyManager lobbyManager;
 	TcpServer server;
@@ -77,3 +76,20 @@ public:
 	/// <param name="">data the client sent as a string</param>
 	void onInputRecieved(SOCKET s, std::string data);
 };
+
+template <typename T>
+std::optional<std::pair<T, std::vector<std::string>>> getCommandFromMap(std::map<std::string, T> commands, TextView* view, std::string& uinput)
+{
+	std::string command_name = lsplit_str(uinput);
+	const auto& commandEntry = commands.find(command_name);
+
+	if (commandEntry == commands.end()) {
+		view->error("Unknown Command: '" + command_name + "'");
+		return std::nullopt;
+	}
+	std::vector<std::string> vec;
+	split_str(uinput, " ", vec);
+	vec.erase(vec.begin()); // get rid of the first input (which is the command name
+	std::shared_ptr<UnoGameTextCommand> command;
+	return std::optional{ std::make_pair(commandEntry->second, vec) };
+}

@@ -80,35 +80,6 @@ const void TextController::playerDoTurn() {
 	}
 }
 
-template <typename T>
-std::optional<std::pair<T,std::vector<std::string>>> getCommandFromMap(std::map<std::string, T> commands, TextView* view, std::string& uinput)
-{
-	std::string command_name = lsplit_str(uinput);
-	const auto& commandEntry = commands.find(command_name);
-
-	if (commandEntry == commands.end()) {
-		view->error("Unknown Command: '" + command_name + "'");
-	}
-	else {
-		std::vector<std::string> vec;
-		split_str(uinput, " ", vec);
-		vec.erase(vec.begin()); // get rid of the first input (which is the command name
-		std::shared_ptr<UnoGameTextCommand> command;
-
-		try {
-			return std::optional{ std::make_pair(commandEntry->second, vec) };
-		}
-		catch (const std::exception& ex) {
-			view->error(std::string("BAD INPUT: ") + ex.what());
-			return std::nullopt;
-		}
-		catch (...) {
-			view->error("BAD INPUT: failed to create command with given parameters");	
-			return std::nullopt;
-		}
-	}
-}
-
 void SimpleSocketBasedController::startGame() {
 	std::cout << "[ ] Starting UNO networked server controller" << std::endl;
 	server.start();
@@ -118,26 +89,12 @@ void SimpleSocketBasedController::startGame() {
 void SimpleSocketBasedController::onDisconnect(SOCKET s)
 {
 	// remove from client map
-	auto infoIter = clientMap.find(s);
-	if (infoIter == clientMap.end()) {
-		throw std::exception("Invalid state, unconnected socket disconnected from server");
-	}
-
-	if (infoIter->second != "") {
-		auto& lobby = lobbyManager.getLobby(infoIter->second);
-		for (auto& client : lobby.clients) {
-			clientMap.erase(client->getSocket());
-		}
-		lobbyManager.removeLobby(infoIter->second);
-	}
-
-	clientMap.erase(infoIter);
+	lobbyManager.removeClient(s);
 }
 
 void SimpleSocketBasedController::onClientConnected(SOCKET s)
 {
-	// enter client into a map with no lobby id ("")
-	clientMap[s] = "";
+	lobbyManager.addClient(s);
 }
 
 void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
@@ -148,44 +105,53 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 	if (iter == clientMap.end()) {
 		throw std::exception("Client was incorrectly dropped from client map, aborting program.");
 	}
-	SocketView requesterView({ s }, server);
+	std::vector<SOCKET> requesterVec;
+	requesterVec.push_back(s);
+	SocketView requesterView(requesterVec, server);
 
 	if (iter->second == "") {
 		auto maybeCommand = getCommandFromMap<LobbyCommandFactory>(pregameCommands, &requesterView, uinput);
 		if (!maybeCommand.has_value()) {
-			requesterView.error("Enter a valid command name next time!");
+			return requesterView.error("Enter a valid command name next time!");
 		}
-		else {
-			auto [commandFactory, argsVec] = maybeCommand.value();
-			auto command = commandFactory(argsVec);
-			try {
-				command->run(s, lobbyManager, &requesterView);
-			}
-			catch (const std::exception& ex) {
-				requesterView.error(std::string("ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
-				// if there was an error, let the player have the chance to retry
-				return;
-			}
-			catch (...) {
-				requesterView.error("UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
-				std::rethrow_exception(std::current_exception());
-			}
+		auto [commandFactory, argsVec] = maybeCommand.value();
+
+		std::shared_ptr<LobbyTextCommand> command = nullptr;
+		// try parsing the user input into a command that we can then run
+		try {
+			command = commandFactory(argsVec);
 		}
-	}
+		catch (const std::exception& ex) {
+			return requesterView.error(std::string("BAD INPUT: ") + ex.what());
+		}
+		catch (...) {
+			return requesterView.error("BAD INPUT: failed to create command with given parameters");
+		}
+
+		// now try running the command
+		try {
+			command->run(s, lobbyManager, &requesterView);
+		}
+		catch (const std::exception& ex) {
+			return requesterView.error(std::string("ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
+		}
+		catch (...) {
+			requesterView.error("UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
+			std::rethrow_exception(std::current_exception());
+		}
+	} 
 	else {
 		// handle in game: take turn like normal
 		requesterView.error("Not yet implemented");
 	}
-	
 }
 
 std::map<std::string, LobbyCommandFactory> SimpleSocketBasedController::make_pregame_command_dict()
 {
 	std::map<std::string, LobbyCommandFactory> m;
 	m["help"]  = [](auto args) { return std::make_shared<LobbyHelpCommand>(args); };
-	/*m["new"]   = [](auto args) { return std::make_shared<NewLobbyCommand>(); };
-	m["join"]  = [](auto args) { return std::make_shared<JoinLobbyCommand>(); };
-	m["start"] = [](auto args) { return std::make_shared<StartLobbyCommand>(); };*/
+	m["new"]   = [](auto args) { return std::make_shared<NewLobbyCommand>(args); };
+	m["join"]  = [](auto args) { return std::make_shared<JoinLobbyCommand>(args); };
 
 	return m;
 }
