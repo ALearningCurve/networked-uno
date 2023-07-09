@@ -35,19 +35,9 @@ public:
 };
 
 class SimpleSocketBasedController : public Controller, public ServerInterface {
-	struct Lobby {
-		std::string lobby_id;
-		std::vector<SocketPlayer> clients;
-		GameState game;
-		SOCKET creator;
-		// if is started, don't allow new clients to join
-		bool started = false;
-	};
-
 	// invariant: if ClientInformation in client map has lobby_id, then
 	// that lobby must exist in lobby map
 	std::map<SOCKET, std::string> clientMap;
-	std::map<std::string, std::unique_ptr<Lobby>> lobbyMap;
 	const static std::map<std::string, VecCommand> pregameCommands;
 	TcpServer server;
 

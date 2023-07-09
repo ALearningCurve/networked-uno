@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="controller\text_controller.cpp" />
     <ClCompile Include="helpers\stringutils.cpp" />
+    <ClCompile Include="LobbyManager.cpp" />
     <ClCompile Include="models\card.cpp" />
     <ClCompile Include="models\deck.cpp" />
     <ClCompile Include="models\game_state.cpp" />
@@ -34,6 +35,7 @@
     <ClInclude Include="controller\controller.h" />
     <ClInclude Include="exceptions\exception.h" />
     <ClInclude Include="helpers\stringutils.h" />
+    <ClInclude Include="LobbyManager.h" />
     <ClInclude Include="models\card.h" />
     <ClInclude Include="models\deck.h" />
     <ClInclude Include="models\game_state.h" />

@@ -66,6 +66,9 @@
     <ClCompile Include="controller\text_controller.cpp">
       <Filter>Source Files\controller</Filter>
     </ClCompile>
+    <ClCompile Include="LobbyManager.cpp">
+      <Filter>Source Files\model</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="UnoCPP.h">
@@ -106,6 +109,9 @@
     </ClInclude>
     <ClInclude Include="tcp_server.h">
       <Filter>Header Files\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="LobbyManager.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
