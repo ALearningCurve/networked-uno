@@ -99,6 +99,8 @@ void SimpleSocketBasedController::onClientConnected(SOCKET s)
 
 void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 {
+	std::string fromController = "from controller";
+	server.sendClientMessage(s, fromController);
 	auto clientLobbyId = lobbyManager.getClientLobbyId(s);
 	std::vector<SOCKET> requesterVec;
 	requesterVec.push_back(s);
