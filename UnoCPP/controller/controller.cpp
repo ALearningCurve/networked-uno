@@ -73,12 +73,12 @@ void SimpleSocketBasedController::startGame() {
 void SimpleSocketBasedController::onDisconnect(SOCKET s)
 {
 	// remove from client map
-	auto optLobbyId = lobbyManager.getClientLobbyId(s);
+	auto optLobbyId = lobbyManager.get_client_lobby_id(s);
 	if (optLobbyId.has_value()) {
-		auto& lobby = lobbyManager.getLobby(optLobbyId.value());
+		auto& lobby = lobbyManager.get_lobby(optLobbyId.value());
 		std::vector<SOCKET> vec;
 		for (auto& client : lobby._clients) {
-			SOCKET socket = client->getSocket();
+			SOCKET socket = client.socket;
 			if (socket != s) {
 				vec.push_back(socket);
 			}
@@ -86,12 +86,12 @@ void SimpleSocketBasedController::onDisconnect(SOCKET s)
 		SocketView view(vec, server);
 		view.alert("One of the memebers in the lobby disconnected, destroying lobby! You will be sent back to the lobby selction screen shortly.");
 	}
-	lobbyManager.removeClient(s);
+	lobbyManager.remove_client(s);
 }
 
 void SimpleSocketBasedController::onClientConnected(SOCKET s)
 {
-	lobbyManager.addClient(s);
+	lobbyManager.add_client(s);
 	std::vector<SOCKET> vec = { s };
 	SocketView view(vec, server);
 	view.alert("Welcome to the uno game server! You are in the lobby selection stage of the server. Type \"help\" for help.");
@@ -99,7 +99,7 @@ void SimpleSocketBasedController::onClientConnected(SOCKET s)
 
 void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 {
-	auto clientLobbyId = lobbyManager.getClientLobbyId(s);
+	auto clientLobbyId = lobbyManager.get_client_lobby_id(s);
 	std::vector<SOCKET> requesterVec = { s };
 	SocketView requesterView(requesterVec, server);
 	// because the lobby of the client can change during command execution, 
@@ -139,7 +139,7 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 	} 
 	else {
 		// handle in game: take turn like normal
-		auto& lobby = lobbyManager.getLobby(clientLobbyId.value());
+		auto& lobby = lobbyManager.get_lobby(clientLobbyId.value());
 		if (!lobby._started) {
 			return requesterView.error("Lobby has not yet started, your command was not evaluated. Sit tight until others join!");
 		}
@@ -149,16 +149,16 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 			// then it should not modify the game state). Yet if there is some bug, where the game ends after
 			// a command errors, add a check here to prevent undefined behavior with the game.
 			lobbyView.alert("Game has ended, disconnect from the server to play another game!");
-			lobbyManager.removeLobby(lobby._lobbyId);
+			lobbyManager.remove_lobby(lobby._lobbyId);
 		}
 
-		auto optCommand = CommandUtils::getAndRunUnoGameCommand(_uno_game_command_dict, uinput, &requesterView, &lobbyView, *lobby._game, lobby.getPlayerObject(s));
+		auto optCommand = CommandUtils::getAndRunUnoGameCommand(_uno_game_command_dict, uinput, &requesterView, &lobbyView, *lobby._game, lobby.get_player_from_socket(s));
 
 		// check if the game has ended
 		const Player* winner;
 		if ((winner = lobby._game->get_winner()) != nullptr) {
 			lobbyView.alert("Congrats to " + lobbyView.stringify_player(*winner) + ", they have won! Ending game and closing lobby!");
-			return lobbyManager.removeLobby(lobby._lobbyId);
+			return lobbyManager.remove_lobby(lobby._lobbyId);
 		}
 		
 		if (optCommand.has_value() && optCommand.value()->takes_whole_turn()) {
@@ -170,10 +170,9 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 			lobbyView.alert(ss.str());
 
 			SOCKET currPlayerSocket = INVALID_SOCKET;
-			
 			for (auto& client : lobby._clients) {
-				if (currPlayer == client.get()) {
-					currPlayerSocket = client->getSocket();
+				if (currPlayer == client.player.get()) {
+					currPlayerSocket = client.socket;
 				}
 			}
 			if (currPlayerSocket == INVALID_SOCKET) {

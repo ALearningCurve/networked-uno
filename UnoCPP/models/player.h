@@ -24,10 +24,3 @@ public:
 	bool set_uno_immunity(bool val);
 	bool is_uno_vulnerable() const;
 };
-
-class SocketPlayer : public Player {
-	SOCKET _socket;
-public:
-	SocketPlayer(std::string name, SOCKET socket) : Player(name), _socket(socket) {};
-	SOCKET getSocket() { return _socket;  }
-};

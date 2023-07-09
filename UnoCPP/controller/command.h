@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include "../helpers/stringutils.h"
-#include "../LobbyManager.h"
+#include "../models/lobby_manager.h"
 
 class VecValidator {
 public:
@@ -225,11 +225,11 @@ public:
     }
 
     void run(SOCKET requester, LobbyManager& state, TextView* requesterView, TextView* allInLobbyView) {
-        std::unique_ptr player = std::make_unique<SocketPlayer>(creatorName, requester);
-        state.addPlayerToLobby(lobbyId, std::move(player));
+        SocketPlayer p{ requester, std::make_unique<Player>(creatorName) };
+        state.add_player_to_lobby(lobbyId, std::move(p));
         requesterView->info("Successfully joined lobby");
         allInLobbyView->info("Player \"" + creatorName + "\" joined the lobby");
-        Lobby& l = state.getLobby(lobbyId);
+        Lobby& l = state.get_lobby(lobbyId);
         if (l._started) {
             allInLobbyView->alert("Game has now started! Its " + l._game->get_current_player()->get_name() + "'s turn to start! Type \"gameinfo\" to see your hand now!");
         }
@@ -254,7 +254,7 @@ public:
     }
 
     void run(SOCKET requester, LobbyManager& state, TextView* requesterView, TextView* allInLobbyView) {
-        state.createLobby(lobbyId, requester, numPlayers);
+        state.create_lobby(lobbyId, requester, numPlayers);
         requesterView->info("Created lobby \"" + lobbyId + "\"");
         joinCommand.run(requester, state, requesterView, allInLobbyView);
     }

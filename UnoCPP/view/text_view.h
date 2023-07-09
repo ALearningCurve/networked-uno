@@ -3,7 +3,7 @@
 #include <iostream>
 #include <vector>
 #include "../models/game_state.h"
-#include "../LobbyManager.h"
+#include "../models/lobby_manager.h"
 #include "../tcp_server.h"
 
 

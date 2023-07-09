@@ -29,7 +29,7 @@ GameState::GameState(Deck deck, std::vector<Player*> players): _draw_deck(deck),
 	std::vector<Player*>::iterator iter = players.begin();
 	for (iter; iter < players.end(); iter++)
 	{
-		for (int i = 0; i < 2; ++i) {
+		for (int i = 0; i < 5; ++i) {
 			(*iter)->add_card(this->draw_card());
 		}
 	}
