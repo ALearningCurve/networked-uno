@@ -15,6 +15,11 @@ void TextView::alert(const std::string text)
 	output_message("[~] " + text);
 }
 
+void TextView::raw(const std::string text)
+{
+	output_message(text);
+}
+
 std::string TextView::stringify_current_turn(GameState& game)
 {
 	std::stringstream ss;
@@ -66,5 +71,20 @@ void SocketView::output_message(const std::string& msg)
 {
 	for (auto& socket : _sockets) {
 		_server.sendClientMessage(socket, msg);
+	}
+}
+
+void DynamicClientLobbyView::output_message(const std::string& msg)
+{
+	auto optLobbyId = _lobbyManager.getClientLobbyId(_client);
+	if (!optLobbyId.has_value()) {
+		return;
+	}
+
+	auto& lobby = _lobbyManager.getLobby(optLobbyId.value());
+	for (auto& client : lobby._clients) {
+		std::vector<SOCKET> vec = { client->getSocket() };
+		SocketView view(vec, _server);
+		view.raw(msg);
 	}
 }

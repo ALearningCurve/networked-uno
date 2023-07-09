@@ -158,7 +158,7 @@ public:
 class LobbyTextCommand {
 public:
     virtual ~LobbyTextCommand() = default;
-    virtual void run(SOCKET requester, LobbyManager& state, TextView* view) = 0;
+    virtual void run(SOCKET requester, LobbyManager& state, TextView* requesterView, TextView* allInLobbyView) = 0;
     virtual std::string get_name() const = 0;
 };
 
@@ -173,8 +173,8 @@ public:
         return "lobby help";
     }
 
-    void run(SOCKET requester, LobbyManager& state, TextView* view) {
-        view->info(
+    void run(SOCKET requester, LobbyManager& state, TextView* requesterView, TextView* allInLobbyView) {
+        requesterView->info(
             "Help Menu: \n"
             "  help:        show help menu\n"
             "  new:         create a new lobby and joins you into that lobby. Takes the following arguments:\n"
@@ -202,10 +202,15 @@ public:
         return "lobby help";
     }
 
-    void run(SOCKET requester, LobbyManager& state, TextView* view) {
+    void run(SOCKET requester, LobbyManager& state, TextView* requesterView, TextView* allInLobbyView) {
         std::unique_ptr player = std::make_unique<SocketPlayer>(creatorName, requester);
         state.addPlayerToLobby(lobbyId, std::move(player));
-        view->info("Successfully joined lobby");
+        requesterView->info("Successfully joined lobby");
+        allInLobbyView->info("Player \"" + creatorName + "\" joined the lobby");
+        Lobby& l = state.getLobby(lobbyId);
+        if (l._started) {
+            allInLobbyView->alert("Game has now started! Its " + l._game->get_current_player()->get_name() + "'s turn to start!");
+        }
     }
 
     bool takes_whole_turn() const {
@@ -230,10 +235,10 @@ public:
         return "new lobby";
     }
 
-    void run(SOCKET requester, LobbyManager& state, TextView* view) {
+    void run(SOCKET requester, LobbyManager& state, TextView* requesterView, TextView* allInLobbyView) {
         state.createLobby(lobbyId, requester, numPlayers);
-        view->info("Created lobby \"" + lobbyId + "\"");
-        joinCommand.run(requester, state, view);
+        requesterView->info("Created lobby \"" + lobbyId + "\"");
+        joinCommand.run(requester, state, requesterView, allInLobbyView);
     }
 };
 
