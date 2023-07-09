@@ -4,16 +4,18 @@
 #include "../helpers/stringutils.h"
 #include "../models/lobby_manager.h"
 
+// our command classes use a vector of strings to parse user input. Thus, this namespace holds some utiliy functions to 
+// get strings from the vector and potentially convert the type of the string.
 class VecValidator {
 public:
-    static const std::string& getAndEnsureIndex(const std::vector<std::string>& vec, const int& index) {
+    static const std::string& get_and_ensure_index(const std::vector<std::string>& vec, const int& index) {
         if (vec.size() <= index) {
             throw std::invalid_argument("missing argument #" + std::to_string(index + 1));
         }
         return vec.at(index);
     }
-    static int getInt(const std::vector<std::string>& vec, const int& index) {
-        const std::string& str = VecValidator::getAndEnsureIndex(vec, index);
+    static int get_int(const std::vector<std::string>& vec, const int& index) {
+        const std::string& str = VecValidator::get_and_ensure_index(vec, index);
         try {
             return std::stoi(str);
         }
@@ -25,13 +27,13 @@ public:
         }
     }
 
-    static const std::string& getString(const std::vector<std::string>& vec, const int& index) {
-        return VecValidator::getAndEnsureIndex(vec, index);
+    static const std::string& get_string(const std::vector<std::string>& vec, const int& index) {
+        return VecValidator::get_and_ensure_index(vec, index);
     }
 
-    static const std::optional<std::string> getStringOptional(const std::vector<std::string>& vec, const int& index) {
+    static const std::optional<std::string> get_string_optional(const std::vector<std::string>& vec, const int& index) {
         if (vec.size() > index) {
-            return getAndEnsureIndex(vec, index);
+            return get_and_ensure_index(vec, index);
         }
         return {};
     }
@@ -115,7 +117,7 @@ class PlayCommand : public UnoGameTextCommand {
     const int _cardNum;
     const std::optional<std::string> _wildColorChoice;
 public:
-    PlayCommand(const std::vector<std::string>& args): _cardNum(VecValidator::getInt(args, 0)), _wildColorChoice(VecValidator::getStringOptional(args, 1)) {}
+    PlayCommand(const std::vector<std::string>& args): _cardNum(VecValidator::get_int(args, 0)), _wildColorChoice(VecValidator::get_string_optional(args, 1)) {}
 
     std::string get_name() const {
         return "Play";
@@ -214,7 +216,7 @@ class JoinLobbyCommand : public LobbyTextCommand {
     std::string lobbyId;
     std::string creatorName;
 public:
-    JoinLobbyCommand(const std::vector<std::string>& args) : lobbyId(VecValidator::getString(args, 0)), creatorName(VecValidator::getString(args, 1)) {
+    JoinLobbyCommand(const std::vector<std::string>& args) : lobbyId(VecValidator::get_string(args, 0)), creatorName(VecValidator::get_string(args, 1)) {
         if (creatorName.size() < 1 || creatorName.size() > 15) {
             throw std::exception("Player name must be between 1 and 15 characters");
         }
@@ -243,9 +245,9 @@ class NewLobbyCommand : public LobbyTextCommand {
     JoinLobbyCommand joinCommand;
 public:
     NewLobbyCommand(const std::vector<std::string>& args) : 
-        lobbyId(VecValidator::getString(args, 0)), 
-        creatorName(VecValidator::getString(args, 1)), 
-        numPlayers(VecValidator::getInt(args, 2)),
+        lobbyId(VecValidator::get_string(args, 0)), 
+        creatorName(VecValidator::get_string(args, 1)), 
+        numPlayers(VecValidator::get_int(args, 2)),
         joinCommand(args)
     {}
 
