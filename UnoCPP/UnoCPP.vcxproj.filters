@@ -63,8 +63,14 @@
     <ClCompile Include="view\text_view.cpp">
       <Filter>Source Files\view</Filter>
     </ClCompile>
-    <ClCompile Include="controller\text_controller.cpp">
+    <ClCompile Include="controller\controller.cpp">
       <Filter>Source Files\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="controller\command.cpp">
+      <Filter>Source Files\controller</Filter>
+    </ClCompile>
+    <ClCompile Include="models\lobby_manager.cpp">
+      <Filter>Source Files\model</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,6 +108,12 @@
       <Filter>Header Files\controller</Filter>
     </ClInclude>
     <ClInclude Include="controller\controller.h">
+      <Filter>Header Files\controller</Filter>
+    </ClInclude>
+    <ClInclude Include="models\lobby_manager.h">
+      <Filter>Header Files\model</Filter>
+    </ClInclude>
+    <ClInclude Include="controller\tcp_server.h">
       <Filter>Header Files\controller</Filter>
     </ClInclude>
   </ItemGroup>

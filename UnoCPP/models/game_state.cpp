@@ -11,7 +11,7 @@ std::shared_ptr<Card> GameState::draw_card()
 	return _draw_deck.draw_card();
 }
 
-GameState::GameState(Deck& deck, std::vector<Player*> players): _draw_deck(deck), _players(players)
+GameState::GameState(Deck deck, std::vector<Player*> players): _draw_deck(deck), _players(players)
 {
 	if (deck.get_card_count() < 1) {
 		throw std::invalid_argument("must be at least one card in the deck to start with");
@@ -29,7 +29,7 @@ GameState::GameState(Deck& deck, std::vector<Player*> players): _draw_deck(deck)
 	std::vector<Player*>::iterator iter = players.begin();
 	for (iter; iter < players.end(); iter++)
 	{
-		for (int i = 0; i < 2; ++i) {
+		for (int i = 0; i < 5; ++i) {
 			(*iter)->add_card(this->draw_card());
 		}
 	}
@@ -113,7 +113,7 @@ const std::shared_ptr<Card> GameState::draw_for_player(Player* player)
 	return card;
 }
 
-const void GameState::play_for_player(Player* player, const int& cardPos, std::optional<std::string> optWildColor)
+const Card& GameState::play_for_player(Player* player, const int& cardPos, std::optional<std::string> optWildColor)
 {
 	std::optional<std::string> can_play_res = can_play(player, cardPos, optWildColor);
 	if (can_play_res) {
@@ -133,7 +133,7 @@ const void GameState::play_for_player(Player* player, const int& cardPos, std::o
 	if (_last_card->is_wild()) {
 		_last_card = std::make_shared<Card>(_last_card->type(), *optWildColor);
 	}
-	return void();
+	return *_last_card;
 }
 
 const std::optional<std::string> GameState::can_play(Player* player, const int& cardPos, std::optional<std::string> optWildColor) {

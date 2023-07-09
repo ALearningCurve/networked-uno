@@ -2,16 +2,31 @@
 //
 #include "UnoCPP.h"
 
-int main()
+int main(int argc, char* argv[])
 {
-	Deck deck;
-	Player p1("player 1");
-	Player p2("player 2");
-	//Player p3("player 3");
-	std::vector<Player*> players = { &p1, &p2 };
-	GameState game(deck, players);
-	TextView view(std::cout);
-	TextController controller(game, view, std::cin);
-	controller.startGame();
-	return 0;
+
+	if (argc == 2) {
+		if (strcmp(argv[1], "local") == 0) {
+			Deck deck;
+			Player p1("player 1");
+			Player p2("player 2");
+			std::vector<Player*> players = { &p1, &p2 };
+			GameState game(deck, players);
+			StreamView view(std::cout);
+			TextView* tv = &view;
+			TextController controller(game, tv, std::cin);
+			controller.startGame();
+			return 0;
+		} else if (strcmp(argv[1], "server") == 0) {
+			SimpleSocketBasedController foo;
+			foo.startGame();
+			return 0;
+		}
+	}
+	std::cout << "must specify one of two modes either " 
+		<< "\"local\" (for local play on one terminal for 2 players) or "
+		<< "\"server\" to start a hosted game server" << std::endl;
+	return 1;
+
+
 }

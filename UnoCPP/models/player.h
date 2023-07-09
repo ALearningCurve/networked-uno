@@ -4,6 +4,7 @@
 #include "card.h"
 #include "hand.h"
 #include "../exceptions/exception.h"
+#include <WinSock2.h>
 
 class Player {
 	std::string _name;

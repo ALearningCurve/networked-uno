@@ -15,19 +15,20 @@ void TextView::alert(const std::string text)
 	output_message("[~] " + text);
 }
 
-void TextView::output_message(const std::string& msg)
+void TextView::raw(const std::string text)
 {
-	_out << msg << std::endl;
+	output_message(text);
 }
 
-std::string TextView::stringify_current_turn(GameState& game)
+std::string TextView::stringify_game_start_for_player(GameState& game, Player* player)
 {
 	std::stringstream ss;
 	ss << "Current Game State:"; 
+	ss << "\n\tIts " << game.get_current_player()->get_name() << "'s turn";
 	ss << "\n\tLast played card: ";
 	ss << "" << stringify_card(*game.get_last_card());
 	ss << "\n\tYour hand: ";
-	ss << "\n" << stringify_hand(game.get_current_player()->get_hand(), "\t\t");
+	ss << "\n" << stringify_hand(player->get_hand(), "\t\t");
 	ss << "\n\tPlayer info:";
 	for (Player* player : game.get_players()) {
 		ss << "\n\t\t" << player->get_name() << ": with " << std::to_string(player->get_hand().get_number_cards()) << " cards";
@@ -60,4 +61,31 @@ std::string TextView::stringify_hand(const Hand& hand, const std::string& indent
 
 	}
 	return ss.str();
+}
+
+void StreamView::output_message(const std::string& msg)
+{
+	_out << msg << std::endl;
+}
+
+void SocketView::output_message(const std::string& msg)
+{
+	for (auto& socket : _sockets) {
+		_server.send_client_message(socket, msg);
+	}
+}
+
+void DynamicClientLobbyView::output_message(const std::string& msg)
+{
+	auto optLobbyId = _lobbyManager.get_client_lobby_id(_client);
+	if (!optLobbyId.has_value()) {
+		return;
+	}
+
+	auto& lobby = _lobbyManager.get_lobby(optLobbyId.value());
+	for (auto& client : lobby._clients) {
+		std::vector<SOCKET> vec = { client.socket };
+		SocketView view(vec, _server);
+		view.raw(msg);
+	}
 }
