@@ -2,53 +2,50 @@
 #include <string>
 #include <vector>
 #include "../helpers/stringutils.h"
+#include "../LobbyManager.h"
 
-
-// Base class
-class TextCommand {
-protected: 
-    static const std::string& getAndEnsureIndex(const std::vector<std::string>& vec, const int& index) {
+namespace VecValidator {
+    const std::string& getAndEnsureIndex(const std::vector<std::string>& vec, const int& index) {
         if (vec.size() <= index) {
             throw std::invalid_argument("missing argument #" + std::to_string(index + 1));
         }
         return vec.at(index);
     }
-    static int getInt(const std::vector<std::string> &vec, const int &index) {
-        const std::string& str = TextCommand::getAndEnsureIndex(vec, index);
+    int getInt(const std::vector<std::string>& vec, const int& index) {
+        const std::string& str = VecValidator::getAndEnsureIndex(vec, index);
         try {
-           return std::stoi(str);
+            return std::stoi(str);
         }
         catch (const std::invalid_argument&) {
             throw std::invalid_argument("given \"" + str + "\" when an integer was expected");
-        } 
+        }
         catch (const std::out_of_range&) {
             throw std::invalid_argument("given an input that is too large to parse into an integer");
         }
     }
 
-    static const std::string& getString(const std::vector<std::string>& vec, const int& index) {
-        return TextCommand::getAndEnsureIndex(vec, index);
+    const std::string& getString(const std::vector<std::string>& vec, const int& index) {
+        return VecValidator::getAndEnsureIndex(vec, index);
     }
 
-    static const std::optional<std::string> getStringOptional(const std::vector<std::string>& vec, const int& index) {
+    const std::optional<std::string> getStringOptional(const std::vector<std::string>& vec, const int& index) {
         if (vec.size() > index) {
             return getAndEnsureIndex(vec, index);
         }
         return {};
     }
+}
 
-    static bool getBool(std::string& str) {
-        return false;
-    }
-
+// Base class for commands that modify the game state
+class UnoGameTextCommand {
 public:
-    virtual ~TextCommand() = default;
+    virtual ~UnoGameTextCommand() = default;
     virtual void run(GameState &state, TextView* view) = 0;
     virtual std::string get_name() const = 0;
     virtual bool takes_whole_turn() const = 0;
 };
 
-class HelpCommand : public TextCommand {
+class HelpCommand : public UnoGameTextCommand {
 public:
     HelpCommand() {}
 
@@ -76,7 +73,7 @@ public:
     }
 };
 
-class DrawCommand : public TextCommand {
+class DrawCommand : public UnoGameTextCommand {
 public:
     DrawCommand() {}
     
@@ -94,11 +91,11 @@ public:
      }
 };
 
-class PlayCommand : public TextCommand {
+class PlayCommand : public UnoGameTextCommand {
     const int _cardNum;
     const std::optional<std::string> _wildColorChoice;
 public:
-    PlayCommand(const std::vector<std::string>& args): _cardNum(TextCommand::getInt(args, 0)), _wildColorChoice(TextCommand::getStringOptional(args, 1)) {}
+    PlayCommand(const std::vector<std::string>& args): _cardNum(VecValidator::getInt(args, 0)), _wildColorChoice(VecValidator::getStringOptional(args, 1)) {}
 
     std::string get_name() const {
         return "Play";
@@ -118,7 +115,7 @@ public:
     }
 };
 
-class UnoCommand : public TextCommand {
+class UnoCommand : public UnoGameTextCommand {
 public:
     std::string get_name() const {
         return "Uno";
@@ -133,7 +130,7 @@ public:
     }
 };
 
-class PlayThenUnoCommand : public TextCommand {
+class PlayThenUnoCommand : public UnoGameTextCommand {
     PlayCommand _play;
     UnoCommand _uno;
 public:
@@ -154,5 +151,43 @@ public:
 
     bool takes_whole_turn() const {
         return true;
+    }
+};
+
+class LobbyTextCommand {
+public:
+    virtual ~LobbyTextCommand() = default;
+    virtual void run(SOCKET requester, LobbyManager& state, TextView* view) = 0;
+    virtual std::string get_name() const = 0;
+};
+
+//m["help"] = [](auto args) { return std::make_shared<LobbyHelpCommand>(args); };
+//m["new"] = [](auto args) { return std::make_shared<NewLobbyCommand>(); };
+//m["join"] = [](auto args) { return std::make_shared<JoinLobbyCommand>(); };
+//m["start"] = [](auto args) { return std::make_shared<StartLobbyCommand>(); };
+
+class LobbyHelpCommand : public LobbyTextCommand {
+public:
+public:
+    LobbyHelpCommand() {}
+
+    std::string get_name() const {
+        return "lobby help";
+    }
+
+    void run(GameState& state, TextView* view) {
+        view->info(
+            "Help Menu: \n"
+            "  help:        show help menu\n"
+            "  new:         create a new lobby. Takes the following arguments:\n"
+            "                   - lobbyId: string (between 1 and 15 characters (no whitepace))\n"   
+            "                   - players: number (betwewn 1 and 4). Automatically starts game once this number of players join the lobby\n"                  
+            "  join:        joins a lobby. Takes following arguments: \n"
+            "                   - lobbyId: string of the lobby to join (between 1 and 15 charactes)\n"        
+        );
+    }
+
+    bool takes_whole_turn() const {
+        return false;
     }
 };

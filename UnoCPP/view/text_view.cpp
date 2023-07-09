@@ -61,3 +61,10 @@ void StreamView::output_message(const std::string& msg)
 {
 	_out << msg << std::endl;
 }
+
+void SocketView::output_message(const std::string& msg)
+{
+	for (auto& socket : _sockets) {
+		_server.sendClientMessage(socket, msg);
+	}
+}

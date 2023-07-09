@@ -11,8 +11,11 @@
 #include <memory>
 #include <functional>
 #include <WinSock2.h>
+#include <utility>
 
-using VecCommand = std::function<std::shared_ptr<TextCommand>(const std::vector<std::string>&)>;
+using UnoGameCommandFactory = std::function<std::shared_ptr<UnoGameTextCommand>(const std::vector<std::string>&)>;
+using LobbyCommandFactory = std::function<std::shared_ptr<LobbyTextCommand>(const std::vector<std::string>&)>;
+
 
 class Controller {
 public:
@@ -26,8 +29,8 @@ class TextController : Controller {
 	TextView* _view;
 	std::istream& _input;
 	bool _quit = false;
-	std::map<std::string, VecCommand> make_dict();
-	const std::map<std::string, VecCommand> _command_dict = make_dict();
+	std::map<std::string, UnoGameCommandFactory> make_dict();
+	const std::map<std::string, UnoGameCommandFactory> _command_dict = make_dict();
 	const void playerDoTurn();
 public:
 	TextController(GameState& model, TextView* view, std::istream& istream) : _model(model), _view(view), _input(istream) {};
@@ -38,10 +41,11 @@ class SimpleSocketBasedController : public Controller, public ServerInterface {
 	// invariant: if ClientInformation in client map has lobby_id, then
 	// that lobby must exist in lobby map
 	std::map<SOCKET, std::string> clientMap;
-	const static std::map<std::string, VecCommand> pregameCommands;
+	const static std::map<std::string, LobbyCommandFactory> pregameCommands;
+	LobbyManager lobbyManager;
 	TcpServer server;
 
-	static std::map<std::string, VecCommand> make_pregame_command_dict();
+	static std::map<std::string, LobbyCommandFactory> make_pregame_command_dict();
 public:
 	SimpleSocketBasedController() : server(this) {}
 

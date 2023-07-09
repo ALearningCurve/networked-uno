@@ -23,9 +23,9 @@ void TextController::startGame() {
 	_view->alert("Thanks for playing, quitting game!");
 }
 
-std::map<std::string, VecCommand> TextController::make_dict()
+std::map<std::string, UnoGameCommandFactory> TextController::make_dict()
 {
-	std::map<std::string, VecCommand> m;
+	std::map<std::string, UnoGameCommandFactory> m;
 	m["play"]		= [](auto args) { return std::make_shared<PlayCommand>(args); };
 	m["draw"]		= [](auto args) { return std::make_shared<DrawCommand>(); };
 	m["uno"]		= [](auto args) { return std::make_shared<UnoCommand>(); };
@@ -53,34 +53,15 @@ const void TextController::playerDoTurn() {
 			_quit = true;
 			return;
 		}
-
-		std::string command_name = lsplit_str(uinput);
-		const auto commandEntry = _command_dict.find(command_name);
-
-		if (commandEntry == _command_dict.end()) {
-			_view->error("Unknown Command: '" + command_name + "'");
-		}
-		else {
-			std::vector<std::string> vec;
-			split_str(uinput, " ", vec);
-			vec.erase(vec.begin()); // get rid of the first input (which is the command name
-			std::shared_ptr<TextCommand> command;
-
+	
+		auto maybeCommand = getCommandFromMap<UnoGameCommandFactory>(_command_dict, _view, uinput);
+		if (!maybeCommand.has_value()) {
+			continue;
+		} else {
+			auto [commandFactory, argsVec] = maybeCommand.value();
+			auto command = commandFactory(argsVec);
 			try {
-				command = commandEntry->second(vec);
-			}
-			catch (const std::exception& ex) {
-				_view->error(std::string("BAD INPUT: ") + ex.what());
-				continue;
-			} 
-			catch (...) {
-				return _view->error("BAD INPUT: failed to create command with given parameters");
-				std::rethrow_exception(std::current_exception());
-				continue;
-			}
-
-			try {
-				command->run(this->_model, this->_view);
+				command ->run(this->_model, this->_view);
 			}
 			catch (const std::exception& ex) {
 				_view->error(std::string("ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
@@ -99,7 +80,34 @@ const void TextController::playerDoTurn() {
 	}
 }
 
+template <typename T>
+std::optional<std::pair<T,std::vector<std::string>>> getCommandFromMap(std::map<std::string, T> commands, TextView* view, std::string& uinput)
+{
+	std::string command_name = lsplit_str(uinput);
+	const auto& commandEntry = commands.find(command_name);
 
+	if (commandEntry == commands.end()) {
+		view->error("Unknown Command: '" + command_name + "'");
+	}
+	else {
+		std::vector<std::string> vec;
+		split_str(uinput, " ", vec);
+		vec.erase(vec.begin()); // get rid of the first input (which is the command name
+		std::shared_ptr<UnoGameTextCommand> command;
+
+		try {
+			return std::optional{ std::make_pair(commandEntry->second, vec) };
+		}
+		catch (const std::exception& ex) {
+			view->error(std::string("BAD INPUT: ") + ex.what());
+			return std::nullopt;
+		}
+		catch (...) {
+			view->error("BAD INPUT: failed to create command with given parameters");	
+			return std::nullopt;
+		}
+	}
+}
 
 void SimpleSocketBasedController::startGame() {
 	std::cout << "[ ] Starting UNO networked server controller" << std::endl;
@@ -116,19 +124,14 @@ void SimpleSocketBasedController::onDisconnect(SOCKET s)
 	}
 
 	if (infoIter->second != "") {
-		auto lobbyIter = lobbyMap.find(infoIter->second);
-		if (lobbyIter == lobbyMap.end()) {
-			throw std::exception("Invalid state, could not find lobby that should exist");
+		auto& lobby = lobbyManager.getLobby(infoIter->second);
+		for (auto& client : lobby.clients) {
+			clientMap.erase(client->getSocket());
 		}
-		auto& clients = lobbyIter->second->clients;
-		for (auto& client : clients) {
-			clientMap.erase(client.getSocket());
-		}
-		lobbyMap.erase(lobbyIter);
+		lobbyManager.removeLobby(infoIter->second);
 	}
 
 	clientMap.erase(infoIter);
-
 }
 
 void SimpleSocketBasedController::onClientConnected(SOCKET s)
@@ -137,7 +140,7 @@ void SimpleSocketBasedController::onClientConnected(SOCKET s)
 	clientMap[s] = "";
 }
 
-void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string)
+void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 {
 	std::string fromController = "from controller";
 	server.sendClientMessage(s, fromController);
@@ -145,29 +148,46 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string)
 	if (iter == clientMap.end()) {
 		throw std::exception("Client was incorrectly dropped from client map, aborting program.");
 	}
-	else {
-		if (iter->second == "") {
-			// handle not in lobby
-			// - command: help
-			// - command: new
-			// - command: join
-			// - command: start
+	SocketView requesterView({ s }, server);
+
+	if (iter->second == "") {
+		auto maybeCommand = getCommandFromMap<LobbyCommandFactory>(pregameCommands, &requesterView, uinput);
+		if (!maybeCommand.has_value()) {
+			requesterView.error("Enter a valid command name next time!");
 		}
 		else {
-			// handle in game: take turn like normal
+			auto [commandFactory, argsVec] = maybeCommand.value();
+			auto command = commandFactory(argsVec);
+			try {
+				command->run(s, lobbyManager, &requesterView);
+			}
+			catch (const std::exception& ex) {
+				requesterView.error(std::string("ERROR EXECUTING COMMAND " + command->get_name() + ": ") + ex.what());
+				// if there was an error, let the player have the chance to retry
+				return;
+			}
+			catch (...) {
+				requesterView.error("UNHANDLDED ERROR EXECUTING COMMAND " + command->get_name());
+				std::rethrow_exception(std::current_exception());
+			}
 		}
 	}
+	else {
+		// handle in game: take turn like normal
+		requesterView.error("Not yet implemented");
+	}
+	
 }
 
-std::map<std::string, VecCommand> SimpleSocketBasedController::make_pregame_command_dict()
+std::map<std::string, LobbyCommandFactory> SimpleSocketBasedController::make_pregame_command_dict()
 {
-	std::map<std::string, VecCommand> m;
-	m["help"]  = [](auto args) { return std::make_shared<PregameHelpCommand>(args); };
-	m["new"]   = [](auto args) { return std::make_shared<PregameNewLobbyCommand>(); };
-	m["join"]  = [](auto args) { return std::make_shared<PregameJoinLobbyCommand>(); };
-	m["start"] = [](auto args) { return std::make_shared<PregameHelpCommand>(); };
+	std::map<std::string, LobbyCommandFactory> m;
+	m["help"]  = [](auto args) { return std::make_shared<LobbyHelpCommand>(args); };
+	/*m["new"]   = [](auto args) { return std::make_shared<NewLobbyCommand>(); };
+	m["join"]  = [](auto args) { return std::make_shared<JoinLobbyCommand>(); };
+	m["start"] = [](auto args) { return std::make_shared<StartLobbyCommand>(); };*/
 
 	return m;
 }
 
-const std::map<std::string, VecCommand> SimpleSocketBasedController::pregameCommands = SimpleSocketBasedController::make_pregame_command_dict();
+const std::map<std::string, LobbyCommandFactory> SimpleSocketBasedController::pregameCommands = SimpleSocketBasedController::make_pregame_command_dict();

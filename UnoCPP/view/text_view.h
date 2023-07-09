@@ -1,7 +1,9 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include <vector>
 #include "../models/game_state.h"
+#include "../tcp_server.h"
 
 class TextView {
 	virtual void output_message(const std::string& msg) = 0;
@@ -23,4 +25,12 @@ class StreamView: public TextView {
 
 public:
 	StreamView(std::ostream& out) : _out(out) {};
+};
+
+class SocketView : public TextView {
+	std::vector<SOCKET>& _sockets;
+	TcpServer& _server;
+	void output_message(const std::string& msg);
+public:
+	SocketView(std::vector<SOCKET> sockets, TcpServer& server) : _sockets(sockets), _server(server) {};
 };

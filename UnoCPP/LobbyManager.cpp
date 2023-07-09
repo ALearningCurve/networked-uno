@@ -29,6 +29,11 @@ void LobbyManager::addPlayerToLobby(std::string& lobbyId, std::unique_ptr<Socket
 	lobby.clients.push_back(std::move(player));
 }
 
+void LobbyManager::removeLobby(std::string& lobbyId)
+{
+	lobbyMap.erase(lobbyId);
+}
+
 void LobbyManager::startLobbyGame(std::string& lobbyId, SOCKET requester) {
 	auto& lobby = getLobby(lobbyId);
 	if (requester != lobby.creator) {

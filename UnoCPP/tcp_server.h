@@ -192,7 +192,7 @@ public:
         }
     }
 
-    void sendClientMessage(SOCKET& s, std::string& message) {
+    void sendClientMessage(SOCKET& s, const std::string& message) {
         std::cout << "[ ] Sending SOCKET=" << s << " the message: \"" << message << "\"" << std::endl;
         send(s, message.c_str(), message.size() + 1, 0);
     }
