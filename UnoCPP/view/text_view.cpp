@@ -20,14 +20,15 @@ void TextView::raw(const std::string text)
 	output_message(text);
 }
 
-std::string TextView::stringify_current_turn(GameState& game)
+std::string TextView::stringify_game_start_for_player(GameState& game, Player* player)
 {
 	std::stringstream ss;
 	ss << "Current Game State:"; 
+	ss << "\n\tIts " << player->get_name() << "'s turn";
 	ss << "\n\tLast played card: ";
 	ss << "" << stringify_card(*game.get_last_card());
 	ss << "\n\tYour hand: ";
-	ss << "\n" << stringify_hand(game.get_current_player()->get_hand(), "\t\t");
+	ss << "\n" << stringify_hand(player->get_hand(), "\t\t");
 	ss << "\n\tPlayer info:";
 	for (Player* player : game.get_players()) {
 		ss << "\n\t\t" << player->get_name() << ": with " << std::to_string(player->get_hand().get_number_cards()) << " cards";

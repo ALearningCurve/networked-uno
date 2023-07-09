@@ -58,6 +58,7 @@ public:
         userView->info(
             "Help Menu: \n"
             "  h:           show help menu\n"
+            "  gameinfo:    show game information such as your hand, the last played card, and other player's cards"
             "  draw:        draw a card from the deck\n"
             "  play:        play a card. Takes following arguments: \n"
             "                   - index: numeric index of card in your hand (starting from 0)\n" 
@@ -67,6 +68,23 @@ public:
             "  uno:         shout uno! Note, to say uno on the turn you played a card, use the \"play+uno\" command\n"
             "  q:           quits the game"
         ); 
+    }
+
+    bool takes_whole_turn() const {
+        return false;
+    }
+};
+
+class ShowGameInfoCommand : public UnoGameTextCommand {
+public:
+    ShowGameInfoCommand() {}
+
+    std::string get_name() const {
+        return "show game info";
+    }
+
+    void run(GameState& state, TextView* userView, TextView* wholeGameView, Player* player) {
+        userView->info(userView->stringify_game_start_for_player(state, player));
     }
 
     bool takes_whole_turn() const {
@@ -169,9 +187,6 @@ public:
     virtual std::string get_name() const = 0;
 };
 
-//m["new"] = [](auto args) { return std::make_shared<NewLobbyCommand>(); };
-//m["join"] = [](auto args) { return std::make_shared<JoinLobbyCommand>(); };
-
 class LobbyHelpCommand : public LobbyTextCommand {
 public:
     LobbyHelpCommand(const std::vector<std::string>& args) {}
@@ -190,7 +205,7 @@ public:
             "                   - players: number (betwewn 1 and 4). Automatically starts game once this number of players join the lobby\n" 
             "  join:        joins a lobby. Takes following arguments: \n"
             "                   - lobbyId: string of the lobby to join (between 1 and 15 charactes)\n" 
-            "                   - name: (between 1 and 15 characters (no whitespace)) string of your player's name in the lobby. \n"
+            "                   - name: string (between 1 and 15 characters (no whitespace)) of your player's name in the lobby. \n"
         );
     }
 };
@@ -216,12 +231,8 @@ public:
         allInLobbyView->info("Player \"" + creatorName + "\" joined the lobby");
         Lobby& l = state.getLobby(lobbyId);
         if (l._started) {
-            allInLobbyView->alert("Game has now started! Its " + l._game->get_current_player()->get_name() + "'s turn to start!");
+            allInLobbyView->alert("Game has now started! Its " + l._game->get_current_player()->get_name() + "'s turn to start! Type \"gameinfo\" to see your hand now!");
         }
-    }
-
-    bool takes_whole_turn() const {
-        return false;
     }
 };
 

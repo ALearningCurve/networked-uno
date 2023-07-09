@@ -15,7 +15,7 @@ public:
 	void alert(const std::string text);
 	void raw(const std::string text);
 
-	static std::string stringify_current_turn(GameState& game);
+	static std::string stringify_game_start_for_player(GameState& game, Player* player);
 	static std::string stringify_player(const Player& player);
 	static std::string stringify_card(const Card& card);
 	static std::string stringify_hand(const Hand& hand, const std::string& indent = "");

@@ -9,7 +9,7 @@ void TextController::startGame() {
 	while (!(_quit || winner)) {
 		Player* player = _model.get_current_player();
 		_view->info("Its " + _view->stringify_player(*player) + "'s turn");
-		_view->info(_view->stringify_current_turn(_model));
+		_view->info(_view->stringify_game_start_for_player(_model, _model.get_current_player()));
 		playerDoTurn();
 		if (!(winner = _model.get_winner())) {
 			_view->info(_view->stringify_player(*player) + "'s turn is over\n\n");
@@ -30,6 +30,7 @@ std::map<std::string, UnoGameCommandFactory> TextController::make_uno_game_comma
 	m["draw"]		= [](auto args) { return std::make_shared<DrawCommand>(); };
 	m["uno"]		= [](auto args) { return std::make_shared<UnoCommand>(); };
 	m["help"]		= [](auto args) { return std::make_shared<HelpCommand>(); };
+	m["gameinfo"]   = [](auto args) { return std::make_shared<ShowGameInfoCommand>(); };
 	m["play+uno"]	= [](auto args) { return std::make_shared<PlayThenUnoCommand>(args); };
 
 	return m;
@@ -157,7 +158,30 @@ void SimpleSocketBasedController::onInputRecieved(SOCKET s, std::string uinput)
 		const Player* winner;
 		if ((winner = lobby._game->get_winner()) != nullptr) {
 			lobbyView.alert("Congrats to " + lobbyView.stringify_player(*winner) + ", they have won! Ending game and closing lobby!");
-			lobbyManager.removeLobby(lobby._lobbyId);
+			return lobbyManager.removeLobby(lobby._lobbyId);
+		}
+		
+		if (optCommand.has_value() && optCommand.value()->takes_whole_turn()) {
+			std::stringstream ss;
+			ss << lobby._game->get_current_player()->get_name() << "'s turn has ended. Its ";
+			lobby._game->start_next_turn();
+			auto* currPlayer = lobby._game->get_current_player();
+			ss << currPlayer->get_name() << "'s turn now.";
+			lobbyView.alert(ss.str());
+
+			SOCKET currPlayerSocket = INVALID_SOCKET;
+			
+			for (auto& client : lobby._clients) {
+				if (currPlayer == client.get()) {
+					currPlayerSocket = client->getSocket();
+				}
+			}
+			if (currPlayerSocket == INVALID_SOCKET) {
+				throw std::exception("Could not find next player's socket information");
+			}
+			std::vector<SOCKET> viewSockets = { currPlayerSocket };
+			SocketView nextPlayerView(viewSockets, server);
+			ShowGameInfoCommand().run(*lobby._game, &nextPlayerView, &lobbyView, currPlayer);
 		}
 	}
 }
