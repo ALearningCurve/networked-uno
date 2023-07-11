@@ -11,14 +11,37 @@
 #include <set>
 #pragma comment (lib, "ws2_32.lib")
 
+/// <summary>
+/// Interface that specifies an async event handler for networked server events using sockets
+/// </summary>
 class ServerInterface {
 public:
     virtual ~ServerInterface() = default;
+    /// <summary>
+    /// Called when a client disconnects. 
+    /// </summary>
+    /// <param name="s">The socket of the disconnecting client</param>
     virtual void on_disconnect(SOCKET s) = 0;
+
+    /// <summary>
+    /// Called when a client connects.
+    /// </summary>
+    /// <param name="s">the socket of the connecting client</param>
     virtual void on_client_connected(SOCKET s) = 0;
-    virtual void on_input_recieved(SOCKET s, std::string) = 0;
+
+    /// <summary>
+    /// Called when input is recieved from a client
+    /// </summary>
+    /// <param name="s">the socket of the client we recieved data from</param>
+    /// <param name="uinput">the msg we recieved</param>
+    virtual void on_input_recieved(SOCKET s, std::string uinput) = 0;
 };
 
+/// <summary>
+/// Nonblocking TCP Server that can handle sending/recieving from multiple clients simulatanously. 
+/// To actually do something with the server events, the ServerInterface provided upon construction
+/// can be used to handle disconnect/connect/input recieved events
+/// </summary>
 class TcpServer {
     enum STATES {
         STOPPED = 1,
@@ -32,6 +55,9 @@ class TcpServer {
     fd_set _active_fd_set;
     ServerInterface* _server_interface = nullptr;
 
+    /// <summary>
+    /// Using the server socket, accepts a client (blocking)
+    /// </summary>
     void accept_client() {
         sockaddr_in client;
         int clientSize = sizeof(client);
@@ -60,6 +86,10 @@ class TcpServer {
         _server_interface->on_client_connected(socket);
     }
 
+    /// <summary>
+    /// For all connected clients, see if data has to be read. For the server socket,
+    /// see if a client is attempting to connect. This method is non-blocking.
+    /// </summary>
     void handle_socket_read() {
         char recvbuf[4096];
         int recvbuflen = 4096;
@@ -74,9 +104,7 @@ class TcpServer {
         }
 
         for (int i = 0; i < sockets.size(); i++) {
-            // grab the socket fd at this index 
             SOCKET currSocketFd = sockets.at(i);
-
             if (!FD_ISSET(currSocketFd, &readFdSet)) {
                 continue;
             }
@@ -104,11 +132,16 @@ class TcpServer {
         }
     }
 
+    /// <summary>
+    /// Disconnects a client from the server
+    /// </summary>
+    /// <param name="s">client socket to disconnect</param>
     void disconnect_client(SOCKET s) {
         std::cout << "[ ] Disconnecting client with SOCKET=" << s << std::endl;
         // if you reach this point, connection needs to be shutdown 
         if (shutdown(s, SD_SEND) == SOCKET_ERROR) {
-            std::cout << "" << std::endl;
+            // maybe hanndle this error, but likely this means the client diconnected anyway
+            // so for now do nothing
         }
         closesocket(s);
         FD_CLR(s, &_active_fd_set);
@@ -128,6 +161,10 @@ public:
         system("pause");
     }
 
+    /// <summary>
+    /// Create a server that will handle all server events via the specified server interface
+    /// </summary>
+    /// <param name="serverInterface">Interface to use to hook onto server events</param>
     TcpServer(ServerInterface* serverInterface): _server_interface(serverInterface) {
         if (serverInterface == nullptr) {
             throw std::invalid_argument("Must provide a pointer to a server interface");
@@ -135,6 +172,9 @@ public:
         FD_ZERO(&_active_fd_set);
     }
 
+    /// <summary>
+    /// Starts the TCP Server on port 1337 on all available network interfaces. 
+    /// </summary>
     void start()
     {
         std::cout << "[ ] Starting TCP Server" << std::endl;
@@ -178,10 +218,21 @@ public:
         std::cout << "[ ] Started TCP Server on 0.0.0.0:1337" << std::endl;
     }
 
+    /// <summary>
+    /// Returns the current state of the server
+    /// </summary>
+    /// <returns>state of the server</returns>
     STATES get_state() const {
         return this->state;
     }
 
+    /// <summary>
+    /// While server is active, attempts to handle reading input from clients as well as 
+    /// any connect and disconnect events. Will spin as long as the server is active. Each
+    /// spin handles the connect/disconnect/recieved data events.
+    /// </summary>
+    /// <param name="waitMs">the number of milliseconds to wait after each spin before
+    /// starting the next spin</param>
     void spin(int waitMs) {
         if (state != ACTIVE) {
             throw std::exception("TCP Server state must be active to spin");
@@ -192,6 +243,11 @@ public:
         }
     }
 
+    /// <summary>
+    /// Sends a message to the specified client
+    /// </summary>
+    /// <param name="s">socket to the send the message on</param>
+    /// <param name="message">the message to send</param>
     void send_client_message(SOCKET& s, const std::string& message) {
         std::cout << "[ ] Sending SOCKET=" << s << " the message: \"" << message << "\"" << std::endl;
         send(s, message.c_str(), message.size() + 1, 0);
