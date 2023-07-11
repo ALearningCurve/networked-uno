@@ -36,7 +36,7 @@ async def createServerResponseHandler(s):
             if len(data) == 0:
                 print("Error: Disconnected from server!")
                 return stop()
-            print(f"{data.decode('utf-8')}")
+            print(f"{data.decode('utf-8')}", end="")
         except asyncio.TimeoutError:
             pass
 
