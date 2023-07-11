@@ -21,7 +21,7 @@ From a high level, the general model for the server is based around lobbies whic
 - Via these events, the controller can map each socket to a lobby/active game via the LobbyManager
 - Each lobby contains other players in the game (both their SOCKETs and Player instance used in the game), which lets the controller determine who is who
 - Each lobby has at most one uno game (instance of GameState), which is the game that is being played in the lobby
-- Any communication to the player (in either game mode) is done through a instance of TextView
+- Any communication to the player (in either game mode) is done through an instance of TextView
 - Users can send commands to the server via text that is used to change their lobby state or to take an action in the game depending on if they are in a lobby.
 
 ### The Python Client
