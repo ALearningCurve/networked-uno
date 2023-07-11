@@ -77,12 +77,12 @@ void SocketView::output_message(const std::string& msg)
 
 void DynamicClientLobbyView::output_message(const std::string& msg)
 {
-	auto optLobbyId = _lobbyManager.get_client_lobby_id(_client);
+	auto optLobbyId = _lobby_manager.get_client_lobby_id(_client);
 	if (!optLobbyId.has_value()) {
 		return;
 	}
 
-	auto& lobby = _lobbyManager.get_lobby(optLobbyId.value());
+	auto& lobby = _lobby_manager.get_lobby(optLobbyId.value());
 	for (auto& client : lobby._clients) {
 		std::vector<SOCKET> vec = { client.socket };
 		SocketView view(vec, _server);

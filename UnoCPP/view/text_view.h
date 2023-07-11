@@ -39,9 +39,9 @@ public:
 
 class DynamicClientLobbyView : public TextView {
 	TcpServer& _server;
-	LobbyManager& _lobbyManager;
+	LobbyManager& _lobby_manager;
 	SOCKET& _client;
 	void output_message(const std::string& msg);
 public:
-	DynamicClientLobbyView(LobbyManager& lobbyManager, TcpServer& server, SOCKET& client) : _lobbyManager(lobbyManager), _server(server), _client(client) { };
+	DynamicClientLobbyView(LobbyManager& _lobby_manager, TcpServer& server, SOCKET& client) : _lobby_manager(_lobby_manager), _server(server), _client(client) { };
 };

@@ -43,7 +43,7 @@ void LobbyManager::add_player_to_lobby(std::string& lobbyId, SocketPlayer player
 		throw std::exception("One client can only be in one lobby at a time, this client is already in a lobby!");
 	}
 
-	_client_map[player.socket] = lobby._lobbyId;
+	_client_map[player.socket] = lobby._lobby_id;
 	lobby._clients.push_back(std::move(player));
 	if (lobby._clients.size() >= lobby._max_players) {
 		start_lobby_game(lobbyId);

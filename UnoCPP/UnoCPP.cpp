@@ -15,11 +15,11 @@ int main(int argc, char* argv[])
 			StreamView view(std::cout);
 			TextView* tv = &view;
 			TextController controller(game, tv, std::cin);
-			controller.startGame();
+			controller.start();
 			return 0;
 		} else if (strcmp(argv[1], "server") == 0) {
-			SimpleSocketBasedController foo;
-			foo.startGame();
+			SimpleSocketBasedController networkedController;
+			networkedController.start();
 			return 0;
 		}
 	}

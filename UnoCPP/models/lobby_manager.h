@@ -14,14 +14,14 @@ struct SocketPlayer {
 
 class Lobby {
 public:
-	std::string _lobbyId;
+	std::string _lobby_id;
 	std::vector<SocketPlayer> _clients;
 	std::unique_ptr<GameState> _game = nullptr;
 	SOCKET _creator;
 	// if is started, don't allow new clients to join
 	bool _started = false;
 	int _max_players;
-	Lobby(std::string lobbyId, SOCKET creator, int maxPlayers) : _lobbyId(lobbyId), _creator(creator), _max_players(maxPlayers) {
+	Lobby(std::string lobbyId, SOCKET creator, int maxPlayers) : _lobby_id(lobbyId), _creator(creator), _max_players(maxPlayers) {
 		if (maxPlayers < 2 || maxPlayers > 4) {
 			throw std::exception("Max Players must between 2 and 4");
 		}
