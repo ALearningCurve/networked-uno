@@ -1,5 +1,6 @@
 # Multi-Modal C++ TCP Socket Uno Server
-## Demos
+## Demo Videos
+Click on the thumbnails to watch a demo video for each of the modes!
 ### Networked Mode
 [![LOCAL MODE VIDEO](https://img.youtube.com/vi/0m9v5iwZ0AU/0.jpg)](https://www.youtube.com/watch?v=0m9v5iwZ0AU&list=PLiNsRg8Y2Zs21uPbsQfBDqgWwx87OYVkA&index=1)
 
@@ -13,7 +14,13 @@ This was a great learning experience because I made the decision to only use fun
 
 ### Design
 #### The C++ Server
-The C++ server is obviously written in C++, so I made an effort to use classes and interfaces where appropriate to make the design extendable. As such, I tried separate the code following MVC practices as best as possible. Additionally, I wanted the C++ Uno game to be playable both using a networked game and one where all the clients can play on one computer locally. This requires two different paradigms to support the different playing modes, but a lot of it was abstracted using these aforementioned interfaces. One example of this how the `./UnoCPP/controller/command.h` defines interface types for commands that let us apply the command design pattern. This easily lets us handle user input in a concise, extendable, and simple way. Likewise, using polymorphism with the `TextView` interface lets us reuse the majority of the code for handling user input and displaying results between both the socket based networked controller and the non-networked local controller with ease. 
+The C++ server is obviously written in C++, so I made an effort to use classes and interfaces where appropriate to make the design extendable. As such, I tried separate the code following MVC practices as best as possible. Additionally, I wanted the C++ Uno game to be playable both using a networked game and one where all the clients can play on one computer locally. This requires two different paradigms to support the different playing modes, but a lot of it was abstracted using these aforementioned interfaces. One example of this how the `./UnoCPP/controller/command.h` defines interface types for commands that let us apply the command design pattern. This easily lets us handle user input in a concise, extendable, and simple way. Likewise, using polymorphism with the `TextView` interface lets us reuse the majority of the code for handling user input and displaying results between both the socket based networked controller and the non-networked local controller with ease.
+
+From a high level, the general data model for the server is based around lobbies which link the SOCKET of a user to each game instance:
+- the TCPServer keeps track of active connections via sockets
+- Each socket is mapped to a lobby/active game via each lobby in the LobbyManager
+- Each lobby contains other players in the game (both their SOCKETs and Player instance used in the game), which lets the controller determine who is who
+- Each lobby has at most one uno game (instance of GameState), which is the game that is being played in the lobby
 
 ### The Python Client
 "I thought this was a C++ project, so why is there a python client?" you might ask. Well, since I used the WinSock2 API in the CPP code, only windows users can run the C++ project. So, just for simplicity (since the main learning focus is server code for me) and portability across operating systems, I decided to create a quick and simple python script for a client to connect to the server.
