@@ -66,9 +66,6 @@
     <ClCompile Include="controller\controller.cpp">
       <Filter>Source Files\controller</Filter>
     </ClCompile>
-    <ClCompile Include="controller\command.cpp">
-      <Filter>Source Files\controller</Filter>
-    </ClCompile>
     <ClCompile Include="models\lobby_manager.cpp">
       <Filter>Source Files\model</Filter>
     </ClCompile>

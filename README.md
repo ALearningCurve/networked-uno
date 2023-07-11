@@ -15,7 +15,7 @@ The C++ server is obviously written in C++, so I made an effort to use classes a
 ## Running this project
 Because this project uses the WinSock2 API, unfortunately the C++ Server can only be run on a windows machine. However, since the Client is written in Python, a user can connect to the C++ server from any machine! 
 
-The next steps assume you have downloaded the release zip, extracted it, and have your working directory where you extracted the zip.
+The next steps assume you have downloaded the release zip, extracted it, and have your working directory where you extracted the zip. You can find a release under the [releases GitHub page](https://github.com/ALearningCurve/Uno/releases). 
 
 ### Networked Mode
 In this mode, running the C++ executable `UnoCPP.exe` with the argument `server`  (so `./UnoCPP.exe server`) will start the server on port `1337`.
@@ -29,9 +29,9 @@ In this mode, running the C++ executable `UnoCPP.exe` with argument `local` (so 
 I built this project using Visual Studio and C++ 17, so you *should* find similar success with that setup. Note that because the project uses WinSock2 API, you probably will only be able to build the project on a windows machine.
 
 ## Improvements
-This project was made over the course of many months and shifting goals of what I wanted to get out of it, but there are still some improvements. The shifting goals and ideas for the project is why it supports two methods of play (using the TCP Game Server or locally sharing a single terminal)! As a result of the learning that took place throughout the project I recognize some improvements that can be made, but for the sake of me pursuing my other passions, I am not sure I will come back to fix them:
+This project was made over the course of many months and served as a learning project for me. As a result of the learning that took place throughout the project I recognize some improvements that can be made, but for the sake of me pursuing my other passions, I am not sure I will come back to fix them:
 - For clarity/efficiency it would be nice to replace shared_ptr with unique_ptr to reflect ownership of the Card class in the Player, GameState, and Deck classes (right now they use shared_ptr)
-- Create interface types for the TCPServer and models to enable them to easily be swapped out in the future (for good design)
+- Create interface types for the TCPServer and models to enable them to easily be swapped out in the future (for good design). Also add a translation layer so that the C++ server can run on other platforms and is not limited by WinSock2.
 - Add tests and make sure our classes are testable
 - Add custom exception implementations to allow the controllers to distinguish between user input errors and actual internal errors
 
