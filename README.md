@@ -2,10 +2,15 @@
 ## Demo Videos
 Click on the thumbnails to watch a demo video for each of the modes!
 ### Networked Mode
-[![LOCAL MODE VIDEO](https://img.youtube.com/vi/0m9v5iwZ0AU/0.jpg)](https://www.youtube.com/watch?v=0m9v5iwZ0AU&list=PLiNsRg8Y2Zs21uPbsQfBDqgWwx87OYVkA&index=1)
+[![NETWORKED MODE VIDEO](https://img.youtube.com/vi/0m9v5iwZ0AU/0.jpg)](https://www.youtube.com/watch?v=0m9v5iwZ0AU&list=PLiNsRg8Y2Zs21uPbsQfBDqgWwx87OYVkA&index=1)
+
+[Networked Mode YouTube Video](https://www.youtube.com/watch?v=0m9v5iwZ0AU&list=PLiNsRg8Y2Zs21uPbsQfBDqgWwx87OYVkA&index=1)
 
 ### Local Mode
 [![LOCAL MODE VIDEO](https://img.youtube.com/vi/XiHzQRQydKs/0.jpg)](https://www.youtube.com/watch?v=XiHzQRQydKs&list=PLiNsRg8Y2Zs21uPbsQfBDqgWwx87OYVkA&index=2)
+
+[Local Mode YouTube Video](https://www.youtube.com/watch?v=XiHzQRQydKs&list=PLiNsRg8Y2Zs21uPbsQfBDqgWwx87OYVkA&index=2)
+
 ## About
 ### Why?
 I created this project with the the goal to expand my C++ knowledge, get a better understanding of complex applications using C++, and explore what low level programming and networking looks like. To that extent, in this project I created a non-blocking TCP Server using the WinSock2 API that runs a multi-client uno game server which supports multiple clients, lobbies, and games at the same time. The C++ Server can also be run in "local" mode to forgo networking for simpler experience where all players play from the same terminal.
